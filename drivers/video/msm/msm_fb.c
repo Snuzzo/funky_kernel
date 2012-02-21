@@ -1412,11 +1412,13 @@ static int msm_fb_register(struct msm_fb_data_type *mfd)
 
 	/* Make sure all buffers can be addressed on a page boundary by an x
 	 * and y offset */
-	remainder = (fix->line_length * panel_info->yres) % PAGE_SIZE;
+
+	remainder = (fix->line_length * panel_info->yres) & (PAGE_SIZE - 1);
+					/* PAGE_SIZE is a power of 2 */
 	if (!remainder)
 		remainder = PAGE_SIZE;
 	remainder_mode2 = (fix->line_length *
-				panel_info->mode2_yres) % PAGE_SIZE;
+				panel_info->mode2_yres) & (PAGE_SIZE - 1);
 	if (!remainder_mode2)
 		remainder_mode2 = PAGE_SIZE;
 
