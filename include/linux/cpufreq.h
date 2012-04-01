@@ -27,6 +27,9 @@
 extern uint32_t acpu_check_khz_value(unsigned long khz);
 #endif
 
+/* cmdline_khz variables */
+extern char cmdline_gov;
+
 /*********************************************************************
  *                     CPUFREQ NOTIFIER INTERFACE                    *
  *********************************************************************/
