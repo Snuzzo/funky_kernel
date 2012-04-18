@@ -1534,6 +1534,12 @@ config MSM_MPDEC
 	  (up/down hotplug based on load)
 
 
+config CMDLINE_OPTIONS
+	bool "Enable cmdline options command parsing"
+	default n
+	help
+	  This enables the parsing of cmdline options.
+
 if CPU_FREQ_MSM
 
 config MSM_CPU_FREQ_SET_MIN_MAX
