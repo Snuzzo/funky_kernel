@@ -30,6 +30,9 @@
 #include <linux/usb/android_composite.h>
 #include <mach/board_htc.h>
 #include <mach/board.h>
+#include <linux/device.h>
+#include <linux/kobject.h>
+#include <linux/sysfs.h>
 #if defined(CONFIG_MACH_HOLIDAY)
 #define AC_CURRENT_SWTICH_DELAY_200MS		200
 #define AC_CURRENT_SWTICH_DELAY_100MS		100
@@ -69,6 +72,101 @@ static const unsigned short normal_i2c[] = { I2C_CLIENT_END };
 static int tps65200_initial = -1;
 static int tps65200_low_chg;
 static int tps65200_vdpm_chg = 0;
+
+
+/* Stole these from ksysfs.c - ic3man5 */
+#define KERNEL_ATTR_RO(_name) \
+static struct kobj_attribute _name##_attr = __ATTR_RO(_name)
+
+#define KERNEL_ATTR_RW(_name) \
+static struct kobj_attribute _name##_attr = \
+	__ATTR(_name, 0644, _name##_show, _name##_store)
+
+struct kobject *kobj;
+
+#define CHARGE_RATE_550 0x0 /* 0000 – 11 mV (550 mA) */
+#define CHARGE_RATE_650 0x1 /* 0001 – 13 mV (650 mA) */
+#define CHARGE_RATE_750 0x2 /* 0010 – 15 mV (750 mA) */
+#define CHARGE_RATE_850 0x3 /* 0011 – 17 mV (850 mA) */
+#define CHARGE_RATE_950 0x4 /* 0100 – 19 mV (950 mA) */
+#define CHARGE_RATE_1050 0x5 /* 0101 – 21 mV (1050 mA) */
+#define CHARGE_RATE_1150 0x6 /* 0110 – 23 mV (1150 mA) */
+#define CHARGE_RATE_1250 0x7 /* 0111 – 25 mV (1250 mA) */
+#define CHARGE_RATE_1350 0x8 /* 1000 – 27 mV (1350 mA) */
+#define CHARGE_RATE_1450 0x9 /* 1001 – 29 mV (1450 mA) */
+#define CHARGE_RATE_1550 0x10 /* 1010 – 31 mV (1550 mA) */
+#define CHARGE_RATE_MAX CHARGE_RATE_1250
+
+static int slow_charge_rate = CHARGE_RATE_550;
+static int fast_charge_rate = CHARGE_RATE_1050;
+
+static ssize_t slow_charge_rate_show(struct kobject *dev,
+				     struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", slow_charge_rate);
+}
+
+static ssize_t slow_charge_rate_store(struct kobject *dev,
+				     struct kobj_attribute *attr,
+				     const char *buf, size_t count)
+{
+	unsigned long i;
+	if (strict_strtoul(buf, 10, &i))
+		return -EINVAL;
+
+	if (i <= CHARGE_RATE_MAX)
+		slow_charge_rate=i;
+	else
+		slow_charge_rate=CHARGE_RATE_MAX;
+	return count;
+}
+
+KERNEL_ATTR_RW(slow_charge_rate);
+
+static struct attribute *slow_charge_attributes[] = {
+	&slow_charge_rate_attr.attr,
+	NULL,
+};
+
+static struct attribute_group slow_charge_attr_group = {
+	.attrs = slow_charge_attributes,
+};
+
+
+static ssize_t fast_charge_rate_show(struct kobject *dev,
+				     struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%u\n", fast_charge_rate);
+}
+
+static ssize_t fast_charge_rate_store(struct kobject *dev,
+				     struct kobj_attribute *attr,
+				     const char *buf, size_t count)
+{
+	unsigned long i;
+	if (strict_strtoul(buf, 10, &i))
+		return -EINVAL;
+
+	if (i <= CHARGE_RATE_MAX)
+		fast_charge_rate=i;
+	else
+		fast_charge_rate=CHARGE_RATE_MAX;
+	return count;
+}
+
+KERNEL_ATTR_RW(fast_charge_rate);
+
+static struct attribute *fast_charge_attributes[] = {
+	&fast_charge_rate_attr.attr,
+	NULL,
+};
+
+static struct attribute_group fast_charge_attr_group = {
+	.attrs = fast_charge_attributes,
+};
+
+
+
 
 #ifdef CONFIG_SUPPORT_DQ_BATTERY
 static int htc_is_dq_pass;
@@ -336,12 +434,17 @@ int tps_set_charger_ctrl(u32 ctl)
 	u8 status = 0;
 	u8 regh = 0;
 	u8 regh1 = 0, regh2 = 0, regh3 = 0;
+	u8 charge_rate = 0;
 
+	/*
 	if (get_kernel_flag() & KERNEL_FLAG_ENABLE_FAST_CHARGE)
 		ctl = htc_fake_charger_for_testing(ctl);
+	*/
 
 	if (tps65200_initial < 0)
 		return 0;
+
+	pr_tps_info("debug ctl: 0x%x\n ", ctl);
 
 	switch (ctl) {
 	case POWER_SUPPLY_ENABLE_WIRELESS_CHARGE:
@@ -362,19 +465,21 @@ int tps_set_charger_ctrl(u32 ctl)
 		tps65200_set_chg_stat(1);
 		break;
 	case POWER_SUPPLY_ENABLE_SLOW_CHARGE:
+		charge_rate = 0x1; /* VITERM */
+		charge_rate |= (slow_charge_rate << 3); /* VICHRG */
+		charge_rate |= (0x1 << 7); /* LMTSEL */
+		pr_tps_info("Slow Charge Detection: CONFIG_A: 0x%x\n", charge_rate);
 	case POWER_SUPPLY_ENABLE_FAST_CHARGE:
-		/* 0xB9: (CONFIG_A address 0x01)
-		 * LMTSEL: 1 - Ignore D+D- Detections
-		 * VICHRG: 0111 1.25A
-		 * VITERM: 001 100mA
-		 */
-		/* 0xA9: (CONFIG_A address 0x01)
-		 * LMTSEL: 1 - Ignore D+D- Detections
-		 * VICHRG: 0101 1.05A
-		 * VITERM: 001 100mA
-		 */
 		tps65200_dump_register();
-		tps65200_i2c_write_byte(0xA9, 0x01);
+		if (!charge_rate) {
+			/* We didn't get set above, so lets do it here. */
+			charge_rate = 0x1; /* VITERM */
+			charge_rate |= (fast_charge_rate << 3); /* VICHRG */
+			charge_rate |= (0x1 << 7); /* LMTSEL */
+			pr_tps_info("Fast Charge Detection: CONFIG_A: 0x%x\n", charge_rate);
+		}
+		
+		tps65200_i2c_write_byte(charge_rate, 0x01);
 		tps65200_i2c_write_byte(0x2A, 0x00);
 		/* set DPM regulation voltage to 4.44V */
 		regh = 0x83;
@@ -700,11 +805,29 @@ static int __init sensors_tps65200_init(void)
 	if (res)
 		pr_tps_err("[TPS65200]: Driver registration failed \n");
 
+	kobj=kobject_create_and_add("tps65200",NULL);
+	res = sysfs_create_group(kobj, &slow_charge_attr_group);
+	if (res) {
+		pr_tps_err("[TPS65200]: Failed to create sysfs object \n");
+		sysfs_remove_group(kobj, &slow_charge_attr_group);
+		return res;
+	}
+	res = sysfs_create_group(kobj, &fast_charge_attr_group);
+	if (res) {
+		pr_tps_err("[TPS65200]: Failed to create sysfs object \n");
+		sysfs_remove_group(kobj, &fast_charge_attr_group);
+		return res;
+	}
+	pr_tps_info("Initialized\n ");
 	return res;
 }
 
 static void __exit sensors_tps65200_exit(void)
 {
+	sysfs_remove_group(kobj, &slow_charge_attr_group);
+	sysfs_remove_group(kobj, &fast_charge_attr_group);
+	kobject_del(kobj);
+
 	kfree(chg_int_data);
 	i2c_del_driver(&tps65200_driver);
 }
