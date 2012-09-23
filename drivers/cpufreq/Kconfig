@@ -116,6 +116,20 @@ config CPU_FREQ_DEFAULT_GOV_WHEATLEY
 	help
 	Use the CPUFreq governor 'wheatley' as default.
 
+config CPU_FREQ_DEFAULT_GOV_LAGFREE
+	bool "lagfree"
+	select CPU_FREQ_GOV_LAGFREE
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	Use the CPUFreq governor 'lagfree' as default.
+
+config CPU_FREQ_DEFAULT_GOV_HOTPLUG
+	bool "hotplug"
+	select CPU_FREQ_GOV_HOTPLUG
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	Use the CPUFreq governor 'wheatley' as default.
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -224,7 +238,11 @@ config CPU_FREQ_GOV_WHEATLEY
 	depends on CPU_FREQ
 
 config CPU_FREQ_GOV_LAGFREE
-	tristate "'wheatley' cpufreq governor"
+	tristate "'lagfree' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_HOTPLUG
+	tristate "'hotplug' cpufreq governor"
 	depends on CPU_FREQ
 
 config CPU_FREQ_SAMPLING_LATENCY_MULTIPLIER
