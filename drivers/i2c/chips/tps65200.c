@@ -99,6 +99,7 @@ struct kobject *kobj;
 
 static int slow_charge_rate = CHARGE_RATE_550;
 static int fast_charge_rate = CHARGE_RATE_1050;
+static u8 batt_charging_state = POWER_SUPPLY_DISABLE_CHARGE;
 
 static ssize_t slow_charge_rate_show(struct kobject *dev,
 				     struct kobj_attribute *attr, char *buf)
@@ -118,6 +119,7 @@ static ssize_t slow_charge_rate_store(struct kobject *dev,
 		slow_charge_rate=i;
 	else
 		slow_charge_rate=CHARGE_RATE_MAX;
+	tps_set_charger_ctrl(batt_charging_state);
 	return count;
 }
 
@@ -151,6 +153,7 @@ static ssize_t fast_charge_rate_store(struct kobject *dev,
 		fast_charge_rate=i;
 	else
 		fast_charge_rate=CHARGE_RATE_MAX;
+	tps_set_charger_ctrl(batt_charging_state);
 	return count;
 }
 
@@ -172,7 +175,7 @@ static struct attribute_group fast_charge_attr_group = {
 static int htc_is_dq_pass;
 #endif
 
-u8 batt_charging_state;
+
 
 static void tps65200_set_check_alarm(void)
 {
@@ -444,7 +447,7 @@ int tps_set_charger_ctrl(u32 ctl)
 	if (tps65200_initial < 0)
 		return 0;
 
-	pr_tps_info("debug ctl: 0x%x\n ", ctl);
+	pr_tps_info("Debug ctl: 0x%x\n ", ctl);
 
 	switch (ctl) {
 	case POWER_SUPPLY_ENABLE_WIRELESS_CHARGE:
@@ -463,7 +466,10 @@ int tps_set_charger_ctrl(u32 ctl)
 		pr_tps_info("Switch charger ON (SLOW): regh 0x03=%x, "
 				"regh 0x02=%x\n", regh1, regh2);
 		tps65200_set_chg_stat(1);
+		batt_charging_state = ctl;
 		break;
+	case VDPM_476V:
+		pr_tps_info("VDPM 476V Request - Experimentally setting to Slow Charge.\n");
 	case POWER_SUPPLY_ENABLE_SLOW_CHARGE:
 		charge_rate = 0x1; /* VITERM */
 		charge_rate |= (slow_charge_rate << 3); /* VICHRG */
@@ -494,6 +500,7 @@ int tps_set_charger_ctrl(u32 ctl)
 				"regh 0x00=%x, regh 0x03=%x, regh 0x02=%x\n",
 				regh, regh1, regh2, regh3);
 		tps65200_set_chg_stat(1);
+		batt_charging_state = ctl;
 		break;
 	case POWER_SUPPLY_DISABLE_CHARGE:
 		pr_tps_info("Switch charger OFF\n");
@@ -506,6 +513,7 @@ int tps_set_charger_ctrl(u32 ctl)
 		tps65200_low_chg = 1;
 		tps65200_i2c_read_byte(&regh, 0x03);
 		pr_tps_info("Switch charger ON (LIMITED): regh 0x03=%x\n", regh);
+		batt_charging_state = ctl;
 		break;
 	case CLEAR_LIMITED_CHG:
 		tps65200_i2c_write_byte(0x83, 0x03);
@@ -536,6 +544,7 @@ int tps_set_charger_ctrl(u32 ctl)
 		regh = (regh & 0xC0) | 0x1C;
 		tps65200_i2c_write_byte(regh, 0x02);
 		tps65200_i2c_read_byte(&regh, 0x02);
+		batt_charging_state = ctl;
 		pr_tps_info("Switch charger OVERTEMP_VREG_4060: regh 0x02=%x\n", regh);
 		break;
 	case NORMALTEMP_VREG:
@@ -543,6 +552,7 @@ int tps_set_charger_ctrl(u32 ctl)
 		regh = (regh & 0xC0) | 0X23;
 		tps65200_i2c_write_byte(regh, 0x02);
 		tps65200_i2c_read_byte(&regh, 0x02);
+		batt_charging_state = ctl;
 		pr_tps_info("Switch charger NORMALTEMP_VREG_4200: regh 0x02=%x\n", regh);
 		break;
 	default:
