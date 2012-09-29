@@ -115,6 +115,10 @@ static ssize_t slow_charge_rate_store(struct kobject *dev,
 	if (strict_strtoul(buf, 10, &i))
 		return -EINVAL;
 
+	if (i >= 550) {
+		i = 550;
+		i /= 100;
+	}
 	if (i <= CHARGE_RATE_MAX)
 		slow_charge_rate=i;
 	else
@@ -148,6 +152,11 @@ static ssize_t fast_charge_rate_store(struct kobject *dev,
 	unsigned long i;
 	if (strict_strtoul(buf, 10, &i))
 		return -EINVAL;
+
+	if (i >= 550) {
+		i = 550;
+		i /= 100;
+	}
 
 	if (i <= CHARGE_RATE_MAX)
 		fast_charge_rate=i;
@@ -431,137 +440,124 @@ static void set_golfu_regh(void)
 }
 #endif
 
+/* Move this to tps65200.h */
+enum chg_ctl_t {
+    CHG_DO_NOTHING = 0,
+    CHG_SLOW,
+    CHG_FAST,
+    CHG_STOP,
+    CHG_CHECK
+};
+
+/* TODO: Fix spacing into tabs here... used wrong editor. */
 int tps_set_charger_ctrl(u32 ctl)
 {
-	int result = 0;
-	u8 status = 0;
-	u8 regh = 0;
-	u8 regh1 = 0, regh2 = 0, regh3 = 0;
-	u8 charge_rate = 0;
-
-	/*
-	if (get_kernel_flag() & KERNEL_FLAG_ENABLE_FAST_CHARGE)
-		ctl = htc_fake_charger_for_testing(ctl);
-	*/
-
-	if (tps65200_initial < 0)
-		return 0;
-
-	pr_tps_info("Debug ctl: 0x%x\n ", ctl);
-
-	switch (ctl) {
-	case POWER_SUPPLY_ENABLE_WIRELESS_CHARGE:
-		tps65200_dump_register();
-		tps65200_i2c_write_byte(0x29, 0x01);
-		tps65200_i2c_write_byte(0x2A, 0x00);
-		/* set DPM regulation voltage to 4.44V */
-		regh = 0x83;
-		if (tps65200_low_chg)
-			regh |= 0x08;	/* enable low charge curent */
-		tps65200_i2c_write_byte(regh, 0x03);
-		regh = 0x63;
-		tps65200_i2c_write_byte(regh, 0x02);
-		tps65200_i2c_read_byte(&regh1, 0x03);
-		tps65200_i2c_read_byte(&regh2, 0x02);
-		pr_tps_info("Switch charger ON (SLOW): regh 0x03=%x, "
-				"regh 0x02=%x\n", regh1, regh2);
-		tps65200_set_chg_stat(1);
-		batt_charging_state = ctl;
-		break;
-	case VDPM_476V:
-		pr_tps_info("VDPM 476V Request - Experimentally setting to Slow Charge.\n");
-	case POWER_SUPPLY_ENABLE_SLOW_CHARGE:
-		charge_rate = 0x1; /* VITERM */
-		charge_rate |= (slow_charge_rate << 3); /* VICHRG */
-		charge_rate |= (0x1 << 7); /* LMTSEL */
-		pr_tps_info("Slow Charge Detection: CONFIG_A: 0x%x\n", charge_rate);
-	case POWER_SUPPLY_ENABLE_FAST_CHARGE:
-		tps65200_dump_register();
-		if (!charge_rate) {
-			/* We didn't get set above, so lets do it here. */
-			charge_rate = 0x1; /* VITERM */
-			charge_rate |= (fast_charge_rate << 3); /* VICHRG */
-			charge_rate |= (0x1 << 7); /* LMTSEL */
-			pr_tps_info("Fast Charge Detection: CONFIG_A: 0x%x\n", charge_rate);
-		}
-		
-		tps65200_i2c_write_byte(charge_rate, 0x01);
-		tps65200_i2c_write_byte(0x2A, 0x00);
-		/* set DPM regulation voltage to 4.44V */
-		regh = 0x83;
-		tps65200_i2c_write_byte(regh, 0x03);
-		regh = 0xE3;
-		tps65200_i2c_write_byte(regh, 0x02);
-		tps65200_i2c_read_byte(&regh, 0x01);
-		tps65200_i2c_read_byte(&regh1, 0x00);
-		tps65200_i2c_read_byte(&regh2, 0x03);
-		tps65200_i2c_read_byte(&regh3, 0x02);
-		pr_tps_info("Switch charger ON (FAST): regh 0x01=%x, "
-				"regh 0x00=%x, regh 0x03=%x, regh 0x02=%x\n",
-				regh, regh1, regh2, regh3);
-		tps65200_set_chg_stat(1);
-		batt_charging_state = ctl;
-		break;
-	case POWER_SUPPLY_DISABLE_CHARGE:
-		pr_tps_info("Switch charger OFF\n");
-		tps65200_set_chg_stat(0);
-		tps65200_i2c_write_byte(0x29, 0x01);
-		tps65200_i2c_write_byte(0x28, 0x00);
-		break;
-	case ENABLE_LIMITED_CHG:
-		tps65200_i2c_write_byte(0x8B, 0x03);
-		tps65200_low_chg = 1;
-		tps65200_i2c_read_byte(&regh, 0x03);
-		pr_tps_info("Switch charger ON (LIMITED): regh 0x03=%x\n", regh);
-		batt_charging_state = ctl;
-		break;
-	case CLEAR_LIMITED_CHG:
-		tps65200_i2c_write_byte(0x83, 0x03);
-		tps65200_low_chg = 0;
-		tps65200_i2c_read_byte(&regh, 0x03);
-		pr_tps_info("Switch charger OFF (LIMITED): regh 0x03=%x\n", regh);
-		break;
+    static u32 last_ctl = 0;
+    static enum chg_ctl_t chg_type = CHG_DO_NOTHING;
+    int result = 0;
+    int chg_rate = 0x1;
+    u8 status = 0;
+    last_ctl = ctl;
+    batt_charging_state = last_ctl;
+    
+    /* Lets determine how we should handle everything from msm,
+     * after all we are "smart" now and don't care what HTC thinks ;p */
+    switch (ctl) {
+    case VDPM_476V:
+        pr_tps_info("VDPM_476V Triggered.\n");
+    case VDPM_ORIGIN_V:
+        if (ctl == VDPM_ORIGIN_V) {
+            pr_tps_info("VDPM_ORIGIN_V Triggered.\n");
+        }
+        /* I don't really understand VDPM 100% yet. */
+        /* VDPM_ORIGIN_V sets VSREG back to 4.4V while
+         * VDPM_476V sets VSREG to 4.76V. Datasheet doesn't
+         * really state anything interesting about it and
+         * I think we should be fine not to up the voltage.
+         * HTC Thunderbolt battery triggers this */
+    case ENABLE_LIMITED_CHG:
+    case POWER_SUPPLY_ENABLE_WIRELESS_CHARGE:
+    case POWER_SUPPLY_ENABLE_SLOW_CHARGE:
+        chg_type = CHG_SLOW;
+        break;
+    case POWER_SUPPLY_ENABLE_FAST_CHARGE:
+        chg_type = CHG_FAST;
+        break;
+    case OVERTEMP_VREG:
+    case POWER_SUPPLY_DISABLE_CHARGE:
+        chg_type = CHG_STOP;
+        break;
+    case CLEAR_LIMITED_CHG:
+        /* We don't care about this bit because we are defaulting 
+         * to whatever slow charge does */
+        chg_type = CHG_DO_NOTHING;
+        break;
 	case CHECK_CHG:
-		tps65200_i2c_read_byte(&status, 0x06);
-		pr_tps_info("TPS65200 charger check, regh 0x06=%x\n", status);
-		break;
 	case CHECK_INT1:
-		tps65200_i2c_read_byte(&status, 0x08);
-		pr_tps_info("Switch charger CHECK_INT1: regh 0x08h=%x\n", status);
-		result = (int)status;
-		break;
 	case CHECK_INT2:
-		tps65200_i2c_read_byte(&status, 0x09);
-		pr_tps_info("TPS65200 INT2 %x\n", status);
-		result = (int)status;
-		break;
 	case CHECK_CONTROL:
-		tps65200_i2c_read_byte(&status, 0x00);
-		pr_tps_info("TPS65200 check control, regh 0x00=%x\n", status);
-		break;
-	case OVERTEMP_VREG:
-		tps65200_i2c_read_byte(&regh, 0x02);
-		regh = (regh & 0xC0) | 0x1C;
-		tps65200_i2c_write_byte(regh, 0x02);
-		tps65200_i2c_read_byte(&regh, 0x02);
-		batt_charging_state = ctl;
-		pr_tps_info("Switch charger OVERTEMP_VREG_4060: regh 0x02=%x\n", regh);
-		break;
-	case NORMALTEMP_VREG:
-		tps65200_i2c_read_byte(&regh, 0x02);
-		regh = (regh & 0xC0) | 0X23;
-		tps65200_i2c_write_byte(regh, 0x02);
-		tps65200_i2c_read_byte(&regh, 0x02);
-		batt_charging_state = ctl;
-		pr_tps_info("Switch charger NORMALTEMP_VREG_4200: regh 0x02=%x\n", regh);
-		break;
-	default:
-		pr_tps_info("%s: Not supported battery ctr called.!", __func__);
-		result = -EINVAL;
-		break;
-	}
+        chg_type = CHG_CHECK;
+        break;
 
-	return result;
+    case NORMALTEMP_VREG:
+        /* Double check this is correct behavior, I know we have to go into
+         * CV mode at around 80% (seems like thats what msm wants to do). 
+         * but I'm going to ignore it? */
+        if (chg_type != CHG_SLOW || chg_type != CHG_FAST) {
+            chg_type = CHG_SLOW;
+        }
+        break;    
+    default:
+        pr_tps_info("Error: Unrecognized control (0x%x). This is a bug.\n", ctl);
+        chg_type = CHG_DO_NOTHING;
+        result = -EINVAL;
+        break;
+    };
+    
+    /* We are so smart here! */
+    if (chg_type == CHG_SLOW) {
+        chg_rate = 0x1;
+        pr_tps_info("Slow Charging...\n");
+        chg_rate |= (slow_charge_rate << 3);
+        chg_rate |= (0x1 << 7);
+        
+        tps65200_i2c_write_byte(0x2A, 0x00);
+        tps65200_i2c_write_byte(chg_rate, 0x01);
+        tps65200_i2c_write_byte(0xE3, 0x02);
+        tps65200_i2c_write_byte(0x83, 0x03);
+        tps65200_dump_register();
+    } else if (chg_type == CHG_FAST) {
+        chg_rate = 0x1;
+        pr_tps_info("Fast Charging...\n");
+        chg_rate |= (fast_charge_rate << 3);
+        chg_rate |= (0x1 << 7);
+        
+        tps65200_i2c_write_byte(0x2A, 0x00);
+        tps65200_i2c_write_byte(chg_rate, 0x01);
+        tps65200_i2c_write_byte(0xE3, 0x02);
+        tps65200_i2c_write_byte(0x83, 0x03);
+        tps65200_dump_register();
+    } else if (chg_type == CHG_CHECK) {
+        if (ctl == CHECK_INT1) {
+            tps65200_i2c_read_byte(&status, 0x08);
+            return status;
+        } else if (ctl == CHECK_INT2) {
+            tps65200_i2c_read_byte(&status, 0x09);
+            return status;
+        } else if (ctl != CHECK_CHG || ctl != CHECK_CONTROL) {
+            pr_tps_info("Unsupported Check (0x%x). " \
+                "This is a bug but probably harmless.\n", ctl);
+	}
+    } else if (chg_type == CHG_STOP) {
+        pr_tps_info("Stopped Charging...\n");
+        tps65200_i2c_write_byte(0x28, 0x00);
+	tps65200_i2c_write_byte(0x29, 0x01);
+	tps65200_dump_register();
+    } else if (chg_type == CHG_DO_NOTHING) {
+        pr_tps_info("Doing nothing.\n");
+    }
+    
+    return result;
 }
 EXPORT_SYMBOL(tps_set_charger_ctrl);
 
