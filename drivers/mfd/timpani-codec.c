@@ -2766,7 +2766,7 @@ static int adie_codec_write(u8 reg, u8 mask, u8 val)
 	int rc = 0;
 	u8 new_val;
 
-		if (reg > MAX_SHADOW_RIGISTERS) {
+	if (reg > MAX_SHADOW_RIGISTERS) {
 		pr_debug("register number is out of bound for shadow"
 					" registers reg = %d\n", reg);
 		new_val = (val & mask);
