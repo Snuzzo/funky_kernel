@@ -544,6 +544,7 @@ static int __init msm_cpufreq_register(void)
 #endif
 
 	register_pm_notifier(&msm_cpufreq_pm_notifier);
+	register_early_suspend(&msm_cpufreq_early_suspend_handler);
 	return cpufreq_register_driver(&msm_cpufreq_driver);
 }
 
