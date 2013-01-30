@@ -192,14 +192,14 @@ static int hotplug_freq[4][2] = {
 };
 #else
 static int hotplug_rq[4][2] = {
-	{0, 100}, {100, 200}, {200, 300}, {300, 0}
+	{0, 200}, {200, 200}, {200, 300}, {300, 0}
 };
 
 static int hotplug_freq[4][2] = {
-	{0, 500000},
-	{200000, 500000},
-	{200000, 500000},
-	{200000, 0}
+	{0, 800000},
+	{500000, 800000},
+	{500000, 800000},
+	{500000, 0}
 };
 #endif
 
@@ -1268,7 +1268,7 @@ static void dbs_check_cpu(struct cpufreq_nightmare_cpuinfo *this_dbs_info)
 		j_dbs_info->prev_cpu_iowait = cur_iowait_time;
 
 		if (dbs_tuners_ins.ignore_nice) {
-			u64 cur_nice;
+			cputime64_t cur_nice;
 			unsigned long cur_nice_jiffies;
 
 			cur_nice = cputime64_sub(kstat_cpu(j).cpustat.nice,
