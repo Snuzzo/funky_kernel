@@ -1,7 +1,7 @@
 VERSION = 3
 PATCHLEVEL = 0
 SUBLEVEL = 66
-EXTRAVERSION =-FunkyKernel-v2.6
+EXTRAVERSION =-FunkyKernel-v2.7
 NAME = Sneaky Weasel
 
 # *DOCUMENTATION*
