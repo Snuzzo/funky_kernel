@@ -189,6 +189,9 @@ config FB_LITTLE_ENDIAN
 
 endchoice
 
+config SENSE4_REFRATE
+	bool "Sense 4.x Refresh rate fix"
+
 config FB_SYS_FOPS
        tristate
        depends on FB

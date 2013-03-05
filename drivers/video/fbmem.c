@@ -1069,6 +1069,9 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 		if (!lock_fb_info(info))
 			return -ENODEV;
 		var = info->var;
+		#ifdef CONFIG_SENSE4_REFRATE
+		var.reserved[4] = 60;
+		#endif
 		unlock_fb_info(info);
 
 		ret = copy_to_user(argp, &var, sizeof(var)) ? -EFAULT : 0;
