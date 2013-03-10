@@ -1540,6 +1540,10 @@ config CMDLINE_OPTIONS
 	help
 	  This enables the parsing of cmdline options.
 
+config CPU_CLOCK
+	int "Max CPU clock speed"
+	default 1512000
+
 if CPU_FREQ_MSM
 
 config MSM_CPU_FREQ_SET_MIN_MAX

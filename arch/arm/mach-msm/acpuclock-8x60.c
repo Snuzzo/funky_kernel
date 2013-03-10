@@ -84,8 +84,8 @@
 
 /* PTE EFUSE register. */
 #define QFPROM_PTE_EFUSE_ADDR		(MSM_QFPROM_BASE + 0x00C0)
-
-#define FREQ_TABLE_SIZE 36
+#define MAX_CPU				CONFIG_CPU_CLOCK
+#define FREQ_TABLE_SIZE			36
 
 static const void * const clk_ctl_addr[] = {SPSS0_CLK_CTL_ADDR,
 			SPSS1_CLK_CTL_ADDR};
@@ -824,7 +824,7 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 	uint32_t max_khz;
 	struct clkctl_acpu_speed *f;
 
-		max_khz = 1836000;
+		max_khz = MAX_CPU;
 		acpu_freq_tbl = acpu_freq_tbl_oc;
 
 	/* Truncate the table based to max_khz. */
