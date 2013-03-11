@@ -153,6 +153,29 @@ config ARCH_MSM9615
 	select MSM_RPM
 	select MSM_SPM_V2
 	select MSM_NATIVE_RESTART
+
+config XXTREME
+	bool "XxtremelyFunky"
+	select MSM_CPU_FREQ_SET_MIN_MAX
+	select CPU_TURBO
+	select GPU_OVERCLOCK
+
+config XXTRA
+	bool "XxtraFunky"
+	select MSM_CPU_FREQ_SET_MIN_MAX
+	select CPU_OVERCLOCK
+	select GPU_OVERCLOCK
+
+config LUNAR
+	bool "Lunar"
+	select MSM_CPU_FREQ_SET_MIN_MAX
+	select CPU_MID_CLOCK
+	select GPU_OVERCLOCK
+
+config FUNKY
+	bool "Funky"
+	select MSM_CPU_FREQ_SET_MIN_MAX
+
 endmenu
 
 choice
@@ -1540,15 +1563,34 @@ config CMDLINE_OPTIONS
 	help
 	  This enables the parsing of cmdline options.
 
+config CPU_TURBO
+	bool "1944Mhz Extreme CPU Overclock"
+	default n
+
+config CPU_OVERCLOCK
+	bool "1836Mhz CPU Overclock"
+	default n
+
+config CPU_MID_CLOCK
+	bool "1674Mhz MidRange CPU Overclock"
+	default n
+
 config CPU_CLOCK
 	int "Max CPU clock speed"
+	default 1944000 if CPU_TURBO
+	default 1836000 if CPU_OVERCLOCK
+	default 1674000 if CPU_MID_CLOCK
 	default 1512000
 
 if CPU_FREQ_MSM
 
 config MSM_CPU_FREQ_SET_MIN_MAX
 	bool "Set Min/Max CPU frequencies."
-	default n
+	default y if XXTREME
+	default y if XXTRA
+	default y if LUNAR
+	default y if FUNKY
+	default y
 	help
 	  Allow setting min and max CPU frequencies. Sysfs can be used
 	  to override these values.
@@ -1556,12 +1598,16 @@ config MSM_CPU_FREQ_SET_MIN_MAX
 config MSM_CPU_FREQ_MAX
 	int "Max CPU Frequency"
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
-	default 384000
+	default 1674000 if XXTREME
+	default 1674000 if XXTRA
+	default 1296000 if LUNAR
+	default 1296000 if FUNKY
+	default 1512000
 
 config MSM_CPU_FREQ_MIN
 	int "Min CPU Frequency"
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
-	default 245760
+	default 384000
 
 endif # CPU_FREQ_MSM
 

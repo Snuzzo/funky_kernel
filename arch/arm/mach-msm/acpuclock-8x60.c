@@ -851,7 +851,7 @@ int processor_name_read_proc(char *page, char **start, off_t off,
 			   int count, int *eof, void *data)
 {
 	char *p = page;
-	p += sprintf(p, "1.83 GHz");
+	p += sprintf(p, "Funkdified Dual Core");
 	return p - page;
 }
 
