@@ -1582,6 +1582,13 @@ config CPU_CLOCK
 	default 1674000 if CPU_MID_CLOCK
 	default 1512000
 
+config CAL_MAX
+	hex "Max CPU clock speed"
+	default 0x24 if CPU_TURBO
+	default 0x22 if CPU_OVERCLOCK
+	default 0x1F if CPU_MID_CLOCK
+	default 0x1C
+
 if CPU_FREQ_MSM
 
 config MSM_CPU_FREQ_SET_MIN_MAX
@@ -1600,7 +1607,7 @@ config MSM_CPU_FREQ_MAX
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
 	default 1674000 if XXTREME
 	default 1674000 if XXTRA
-	default 1296000 if LUNAR
+	default 1350000 if LUNAR
 	default 1296000 if FUNKY
 	default 1512000
 

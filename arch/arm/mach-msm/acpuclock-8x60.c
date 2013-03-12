@@ -43,7 +43,7 @@
  * The PLL hardware is capable of 192MHz to 1944MHz. The L_VALs
  * used for calibration should respect these limits. */
 #define L_VAL_SCPLL_CAL_MIN	0x08 /* =  432 MHz with 27MHz source */
-#define L_VAL_SCPLL_CAL_MAX	0x24 /* = 1944 MHz with 27MHz source */
+#define L_VAL_SCPLL_CAL_MAX	CONFIG_CAL_MAX /* = 1944 MHz with 27MHz source */
 
 #define MAX_VDD_SC		CONFIG_CPU_FREQ_MAX_VDD /* uV */
 #define MIN_VDD_SC		CONFIG_CPU_FREQ_MIN_VDD /* uV */
@@ -798,7 +798,7 @@ uint32_t acpu_check_khz_value(unsigned long khz)
 {
 	struct clkctl_acpu_speed *f;
 
-        if (khz > 1944000)
+        if (khz > MAX_CPU)
                 return CONFIG_MSM_CPU_FREQ_MAX;
 
         if (khz < 192000)
