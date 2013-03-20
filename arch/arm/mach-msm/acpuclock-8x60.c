@@ -877,13 +877,8 @@ static int __init acpuclk_8x60_init(struct acpuclk_soc_data *soc_data)
 	bus_init();
 
 	/* Improve boot time by ramping up CPUs immediately. */
-#ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
 		for_each_online_cpu(cpu)
-			acpuclk_8x60_set_rate(cpu, CONFIG_MSM_CPU_FREQ_MAX, SETRATE_INIT);
-#else
-		for_each_online_cpu(cpu)
-			acpuclk_8x60_set_rate(cpu, 1512000, SETRATE_INIT);
-#endif
+			acpuclk_8x60_set_rate(cpu, CONFIG_BOOT_CLOCK, SETRATE_INIT);
 	acpuclk_register(&acpuclk_8x60_data);
 	cpufreq_table_init();
 	register_hotcpu_notifier(&acpuclock_cpu_notifier);
