@@ -1591,6 +1591,9 @@ config CAL_MAX
 
 config BOOT_CLOCK
 	int "Boot time CPU clock speed"
+	default 1620000 if CPU_TURBO
+	default 1620000 if CPU_OVERCLOCK
+	default 1620000 if CPU_MID_CLOCK
 	default 1512000
 
 if CPU_FREQ_MSM
