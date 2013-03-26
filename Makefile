@@ -1,6 +1,6 @@
 VERSION = 3
 PATCHLEVEL = 0
-SUBLEVEL = 69
+SUBLEVEL = 70
 EXTRAVERSION =-v2.9-FunkyBean
 NAME = Sneaky Weasel
 
