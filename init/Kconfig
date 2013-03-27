@@ -87,10 +87,6 @@ config CROSS_COMPILE
 
 config LOCALVERSION
 	string "Local version - append to kernel release"
-	default "-XxtremelyFunky" if XXTREME
-	default "-XxtraFunky" if XXTRA
-	default "-Lunar" if LUNAR
-	default "-Funky" if FUNKY
 	help
 	  Append an extra string to the end of your kernel version.
 	  This will show up when you type uname, for example.
@@ -101,10 +97,6 @@ config LOCALVERSION
 
 config LOCALVERSION_AUTO
 	bool "Automatically append version information to the version string"
-	default n if XXTREME
-	default n if XXTRA
-	default n if LUNAR
-	default n if FUNKY
 	default y
 	help
 	  This will try to automatically determine if the current tree is a
