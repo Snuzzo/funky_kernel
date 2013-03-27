@@ -905,11 +905,7 @@ int processor_name_read_proc(char *page, char **start, off_t off,
 			   int count, int *eof, void *data)
 {
 	char *p = page;
-#ifdef CONFIG_LUNAR
-	p += sprintf(p, "Lunar 1.67Ghz Dual Core");
-#else
 	p += sprintf(p, "Funkdified Dual Core");
-#endif
 	return p - page;
 }
 
