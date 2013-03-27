@@ -1540,10 +1540,6 @@ config CMDLINE_OPTIONS
 	help
 	  This enables the parsing of cmdline options.
 
-config CPU_CLOCK
-	int "Max CPU clock speed"
-	default 1512000
-
 config BOOT_CLOCK
 	int "Boot time CPU clock speed"
 	default 1512000
