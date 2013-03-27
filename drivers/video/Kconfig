@@ -191,8 +191,6 @@ endchoice
 
 config SENSE4_REFRATE
 	bool "Sense 4.x Refresh rate fix"
-	default y if LUNAR
-	default n
 
 config FB_SYS_FOPS
        tristate
