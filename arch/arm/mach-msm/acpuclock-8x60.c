@@ -43,7 +43,7 @@
  * The PLL hardware is capable of 192MHz to 1890MHz. The L_VALs
  * used for calibration should respect these limits. */
 #define L_VAL_SCPLL_CAL_MIN	0x08 /* =  432 MHz with 27MHz source */
-#define L_VAL_SCPLL_CAL_MAX	0x23 /* = 1890 MHz with 27MHz source */
+#define L_VAL_SCPLL_CAL_MAX	0x20 /* = 1728 MHz with 27MHz source */
 
 #define MAX_VDD_SC		1600000 /* uV */
 #define MIN_VDD_SC		 675000 /* uV */
@@ -232,9 +232,6 @@ static struct clkctl_acpu_speed acpu_freq_tbl_oc[] = {
   { {1, 1}, 1620000,  ACPU_SCPLL, 0, 0, 1, 0x1E, L2(22), 1200000, 0x03006000},
   { {1, 1}, 1674000,  ACPU_SCPLL, 0, 0, 1, 0x1F, L2(22), 1225000, 0x03006000},
   { {1, 1}, 1728000,  ACPU_SCPLL, 0, 0, 1, 0x20, L2(22), 1250000, 0x03006000},
-  { {1, 1}, 1782000,  ACPU_SCPLL, 0, 0, 1, 0x21, L2(22), 1275000, 0x03006000},
-  { {1, 1}, 1836000,  ACPU_SCPLL, 0, 0, 1, 0x22, L2(22), 1325000, 0x03006000},
-  { {1, 1}, 1890000,  ACPU_SCPLL, 0, 0, 1, 0x23, L2(22), 1400000, 0x03006000},
   { {0, 0}, 0 },
 };
 
@@ -851,7 +848,7 @@ uint32_t acpu_check_khz_value(unsigned long khz)
 {
 	struct clkctl_acpu_speed *f;
 
-        if (khz > 1890000)
+        if (khz > 1728000)
                 return CONFIG_MSM_CPU_FREQ_MAX;
 
         if (khz < 192000)
@@ -877,7 +874,7 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 	uint32_t max_khz;
 	struct clkctl_acpu_speed *f;
 
-		max_khz = 1890000;
+		max_khz = 1728000;
 		acpu_freq_tbl = acpu_freq_tbl_oc;
 
 	/* Truncate the table based to max_khz. */
@@ -927,7 +924,7 @@ static int __init acpuclk_8x60_init(struct acpuclk_soc_data *soc_data)
 
 	/* Improve boot time by ramping up CPUs immediately. */
 		for_each_online_cpu(cpu)
-			acpuclk_8x60_set_rate(cpu, CONFIG_BOOT_CLOCK, SETRATE_INIT);
+			acpuclk_8x60_set_rate(cpu, 1512000, SETRATE_INIT);
 	acpuclk_register(&acpuclk_8x60_data);
 	cpufreq_table_init();
 	register_hotcpu_notifier(&acpuclock_cpu_notifier);
