@@ -2146,8 +2146,11 @@ EXPORT_SYMBOL_GPL(cpufreq_unregister_driver);
 
 static int __init cpufreq_core_init(void)
 {
+#ifdef CONFIG_CPU_VOLTAGE_TABLE
 	int cpu, rc;
-
+#else
+	int cpu;
+#endif
 	for_each_possible_cpu(cpu) {
 		per_cpu(cpufreq_policy_cpu, cpu) = -1;
 		init_rwsem(&per_cpu(cpu_policy_rwsem, cpu));
