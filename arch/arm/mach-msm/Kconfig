@@ -1521,7 +1521,6 @@ config MSM_DALRPC_TEST
 	help
 	  Exercises DAL RPC calls to QDSP6.
 
-
 config MSM_MPDEC
 	bool "Enable kernel based mpdecision"
 	depends on MSM_SMP
@@ -1543,6 +1542,10 @@ config CMDLINE_OPTIONS
 	default n
 	help
 	  This enables the parsing of cmdline options.
+
+config 2DGPU_OVERCLOCK
+	bool "Enable 2D GPU Overclocking option"
+	default n
 
 if CPU_FREQ_MSM
 
