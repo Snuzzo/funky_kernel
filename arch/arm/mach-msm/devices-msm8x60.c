@@ -974,19 +974,23 @@ static struct kgsl_device_platform_data kgsl_2d0_pdata = {
 	.pwrlevel = {
 #ifdef CONFIG_2DGPU_OVERCLOCK
 		{
-			.gpu_freq = 266667000,
+			.gpu_freq = 228571000,
 			.bus_freq = 1,
+		},
+		{
+			.gpu_freq = 228571000,
+			.bus_freq = 0,
 		},
 #else
 		{
 			.gpu_freq = 200000000,
 			.bus_freq = 1,
 		},
-#endif
 		{
 			.gpu_freq = 200000000,
 			.bus_freq = 0,
 		},
+#endif
 	},
 	.init_level = 0,
 	.num_levels = 2,
@@ -1026,6 +1030,17 @@ static struct resource kgsl_2d1_resources[] = {
 
 static struct kgsl_device_platform_data kgsl_2d1_pdata = {
 	.pwrlevel = {
+
+#ifdef CONFIG_2DGPU_OVERCLOCK
+		{
+			.gpu_freq = 228571000,
+			.bus_freq = 1,
+		},
+		{
+			.gpu_freq = 228571000,
+			.bus_freq = 0,
+		},
+#else
 		{
 			.gpu_freq = 200000000,
 			.bus_freq = 1,
@@ -1034,6 +1049,7 @@ static struct kgsl_device_platform_data kgsl_2d1_pdata = {
 			.gpu_freq = 200000000,
 			.bus_freq = 0,
 		},
+#endif
 	},
 	.init_level = 0,
 	.num_levels = 2,
