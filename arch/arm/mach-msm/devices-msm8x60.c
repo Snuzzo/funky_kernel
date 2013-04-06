@@ -1031,10 +1031,17 @@ static struct resource kgsl_2d0_resources[] = {
 
 static struct kgsl_device_platform_data kgsl_2d0_pdata = {
 	.pwrlevel = {
+#ifdef CONFIG_2DGPU_OVERCLOCK
+		{
+			.gpu_freq = 266667000,
+			.bus_freq = 1,
+		},
+#else
 		{
 			.gpu_freq = 200000000,
 			.bus_freq = 1,
 		},
+#endif
 		{
 			.gpu_freq = 200000000,
 			.bus_freq = 0,
