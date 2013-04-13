@@ -1,0 +1,30 @@
+TOOLCHAINDIR=~/toolchain
+
+TOOLCHAIN=linaro-13-02
+
+CROSS_COMPILE=$TOOLCHAINDIR/$TOOLCHAIN/bin/arm-eabi-
+
+LOCAL_BUILD_DIR=~/rez
+
+TARGET_DIR=~/rez/updates
+
+SYSTEM_PARTITION="/dev/block/mmcblk0p29"
+
+DEFCONFIG=vigor_defconfig
+
+FLASH_BOOT='/dev/block/mmcblk0p22'
+
+PHONE='HTC Rezound'
+
+# ----
+
+N_CORES=8
+VERSION=Funky-v3.2
+
+# ----
+
+BANNER=`cat <<EOF
+ui_print("$VERSION");
+ui_print("for");
+ui_print("$PHONE");
+EOF`
