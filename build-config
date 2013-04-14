@@ -8,6 +8,8 @@ LOCAL_BUILD_DIR=~/rez
 
 TARGET_DIR=~/rez/updates
 
+FTPTARGETDIR="/kernels/rezound/ics"
+
 SYSTEM_PARTITION="/dev/block/mmcblk0p29"
 
 DEFCONFIG=vigor_aosp_defconfig
