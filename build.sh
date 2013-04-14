@@ -17,12 +17,15 @@ MAKE=$TOOLS_DIR/make.sh
 
 ZIP=$TARGET_DIR/$VERSION.zip
 SHA1=$TOOLS_DIR/sha1.sh
+FTP=$LOCAL_BUILD_DIR/ftp.sh
 UPDATE_ROOT=$LOCAL_BUILD_DIR/update
 KEYS=$LOCAL_BUILD_DIR/keys
 CERT=$KEYS/certificate.pem
 KEY=$KEYS/key.pk8
 ANYKERNEL=$LOCAL_BUILD_DIR/kernel
 ZIMAGE=arch/arm/boot/zImage
+GOVERNOR=CONFIG_CPU_FREQ_DEFAULT_GOV_$DEFAULT_GOVERNOR
+SCHEDULER=CONFIG_DEFAULT_$DEFAULT_SCHEDULER
 
 msg Building: $VERSION
 echo "   Defconfig:       $DEFCONFIG"
@@ -62,6 +65,10 @@ fi
 $MAKE $DEFCONFIG
 
 perl -pi -e 's/(CONFIG_LOCALVERSION="[^"]*)/\1-'"$VERSION"'"/' .config
+echo "$GOVERNOR=y" >> .config
+echo "$SCHEDULER=y" >> .config
+SCHEDULER=CONFIG_IOSCHED_$DEFAULT_SCHEDULER
+echo "$SCHEDULER=y" >> .config
 
 $MAKE -j$N_CORES
 
@@ -72,6 +79,8 @@ find . -name '*.ko' -exec cp {} $UPDATE_ROOT/system/lib/modules/ \;
 
 mkdir -p $UPDATE_ROOT/META-INF/com/google/android
 cp $TOOLS_DIR/update-binary $UPDATE_ROOT/META-INF/com/google/android
+
+cp build-config $LOCAL_BUILD_DIR/build-config
 
 $SHA1
 
@@ -97,4 +106,5 @@ cp $ANYKERNEL/* $UPDATE_ROOT/kernel
 )
 java -jar $TOOLS_DIR/signapk.jar $CERT $KEY $LOCAL_BUILD_DIR/update.zip $ZIP
 
+$FTP
 msg COMPLETE
