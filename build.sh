@@ -116,4 +116,5 @@ cp $VIDEOFIX/* $UPDATE_ROOT/videofix
 java -jar $TOOLS_DIR/signapk.jar $CERT $KEY $LOCAL_BUILD_DIR/update.zip $ZIP
 
 $FTP
+make mrproper
 msg COMPLETE
