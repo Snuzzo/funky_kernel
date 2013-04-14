@@ -107,4 +107,5 @@ cp $ANYKERNEL/* $UPDATE_ROOT/kernel
 java -jar $TOOLS_DIR/signapk.jar $CERT $KEY $LOCAL_BUILD_DIR/update.zip $ZIP
 
 $FTP
+make mrproper
 msg COMPLETE
