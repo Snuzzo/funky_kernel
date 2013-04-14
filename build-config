@@ -10,7 +10,7 @@ TARGET_DIR=~/rez/updates
 
 SYSTEM_PARTITION="/dev/block/mmcblk0p29"
 
-DEFCONFIG=vigor_defconfig
+DEFCONFIG=vigor_aosp_defconfig
 
 FLASH_BOOT='/dev/block/mmcblk0p22'
 
@@ -19,7 +19,7 @@ PHONE='HTC Rezound'
 # ----
 
 N_CORES=8
-VERSION=Funky-v3.2
+VERSION=FunkyBean-v3.2
 
 # ----
 
