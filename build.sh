@@ -15,7 +15,7 @@ MAKE=$TOOLS_DIR/make.sh
 
 # -----------------------
 
-ZIP=$TARGET_DIR/update-$VERSION.zip
+ZIP=$TARGET_DIR/$VERSION.zip
 SHA1=$TOOLS_DIR/sha1.sh
 UPDATE_ROOT=$LOCAL_BUILD_DIR/update
 KEYS=$LOCAL_BUILD_DIR/keys
@@ -92,10 +92,6 @@ EOF
 
 
 cp $ZIMAGE $ANYKERNEL
-mkdir -p $UPDATE_ROOT/kernel
-mkdir -p $UPDATE_ROOT/global
-mkdir -p $UPDATE_ROOT/postboot
-mkdir -p $UPDATE_ROOT/videofix
 cp $ANYKERNEL/* $UPDATE_ROOT/kernel
 cp $GLOBAL/* $UPDATE_ROOT/global
 cp $POSTBOOT/* $UPDATE_ROOT/postboot
