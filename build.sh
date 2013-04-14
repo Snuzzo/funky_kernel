@@ -22,9 +22,6 @@ KEYS=$LOCAL_BUILD_DIR/keys
 CERT=$KEYS/certificate.pem
 KEY=$KEYS/key.pk8
 ANYKERNEL=$LOCAL_BUILD_DIR/kernel
-GLOBAL=$LOCAL_BUILD_DIR/global
-POSTBOOT=$LOCAL_BUILD_DIR/postboot
-VIDEOFIX=$LOCAL_BUILD_DIR/videofix
 ZIMAGE=arch/arm/boot/zImage
 
 msg Building: $VERSION
@@ -90,12 +87,9 @@ EOF
       < $TOOLS_DIR/updater-script
 ) > $UPDATE_ROOT/META-INF/com/google/android/updater-script
 
-
+mkdir -p $UPDATE_ROOT/kernel
 cp $ZIMAGE $ANYKERNEL
 cp $ANYKERNEL/* $UPDATE_ROOT/kernel
-cp $GLOBAL/* $UPDATE_ROOT/global
-cp $POSTBOOT/* $UPDATE_ROOT/postboot
-cp $VIDEOFIX/* $UPDATE_ROOT/videofix
 
 (
     cd $UPDATE_ROOT
