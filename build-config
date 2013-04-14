@@ -12,6 +12,29 @@ SYSTEM_PARTITION="/dev/block/mmcblk0p29"
 
 DEFCONFIG=vigor_aosp_defconfig
 
+#---
+#You can choose from the following governors
+# ONDEMAND 
+# CONSERVATIVE
+# INTERACTIVE
+# WHEATLEY
+# LAGFREE
+# INTELLIDEMAND
+# DANCEDANCE
+# BADASS
+# SCARY
+# LULZACTIVE
+
+DEFAULT_GOVERNOR=INTELLIDEMAND
+
+#...And the following schedulers
+# SIO
+# NOOP
+# DEADLINE
+# ROW
+
+DEFAULT_SCHEDULER=SIO
+
 FLASH_BOOT='/dev/block/mmcblk0p22'
 
 PHONE='HTC Rezound'

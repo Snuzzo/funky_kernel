@@ -23,6 +23,8 @@ CERT=$KEYS/certificate.pem
 KEY=$KEYS/key.pk8
 ANYKERNEL=$LOCAL_BUILD_DIR/kernel
 ZIMAGE=arch/arm/boot/zImage
+GOVERNOR=CONFIG_CPU_FREQ_DEFAULT_GOV_$DEFAULT_GOVERNOR
+SCHEDULER=CONFIG_DEFAULT_$DEFAULT_SCHEDULER
 
 msg Building: $VERSION
 echo "   Defconfig:       $DEFCONFIG"
@@ -62,6 +64,10 @@ fi
 $MAKE $DEFCONFIG
 
 perl -pi -e 's/(CONFIG_LOCALVERSION="[^"]*)/\1-'"$VERSION"'"/' .config
+echo "$GOVERNOR=y" >> .config
+echo "$SCHEDULER=y" >> .config
+SCHEDULER=CONFIG_IOSCHED_$DEFAULT_SCHEDULER
+echo "$SCHEDULER=y" >> .config
 
 $MAKE -j$N_CORES
 
