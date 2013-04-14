@@ -8,9 +8,34 @@ LOCAL_BUILD_DIR=~/rez
 
 TARGET_DIR=~/rez/updates
 
+FTPTARGETDIR="/kernels/rezound/sense"
+
 SYSTEM_PARTITION="/dev/block/mmcblk0p29"
 
-DEFCONFIG=vigor_defconfig
+DEFCONFIG=vigor_auto_defconfig
+
+#---
+#You can choose from the following governors
+# ONDEMAND 
+# CONSERVATIVE
+# INTERACTIVE
+# WHEATLEY
+# LAGFREE
+# INTELLIDEMAND
+# DANCEDANCE
+# BADASS
+# SCARY
+# LULZACTIVE
+
+DEFAULT_GOVERNOR=INTELLIDEMAND
+
+#...And the following schedulers
+# SIO
+# NOOP
+# DEADLINE
+# ROW
+
+DEFAULT_SCHEDULER=SIO
 
 FLASH_BOOT='/dev/block/mmcblk0p22'
 
@@ -19,7 +44,7 @@ PHONE='HTC Rezound'
 # ----
 
 N_CORES=8
-VERSION=Funky-v3.2
+VERSION=Funky-Kernel-v3.2
 
 # ----
 
