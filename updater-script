@@ -4,38 +4,6 @@ run_program("/sbin/mount","/sdcard");
 run_program("/sbin/mount", "@@SYSTEM_PARTITION@@", "/system");
 ui_print("Installing modules");
 package_extract_dir("system", "/system");
-package_extract_dir("kernel", "/tmp");
-package_extract_dir("postboot", "/system/etc");
-if
-file_getprop("/system/build.prop","ro.aa.taskid")==264016
-then
-ui_print("@		Flashing Sense 3.6 OTA kernel");
-endif;
-if
-file_getprop("/system/build.prop","ro.aa.taskid")==275361
-then
-ui_print("@		Flashing Sense 3.6 Global kernel");
-package_extract_dir("videofix", "/system/etc/firmware");
-package_extract_dir("global", "/system/lib");
-endif;
-if
-file_getprop("/system/build.prop","ro.aa.taskid")==263510
-then
-ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
-package_extract_dir("videofix", "/system/etc/firmware");
-endif;
-if
-file_getprop("/system/build.prop","ro.aa.taskid")==290923
-then
-ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
-package_extract_dir("videofix", "/system/etc/firmware");
-endif;
-if
-file_getprop("/system/build.prop","ro.aa.taskid")==249167
-then
-ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
-package_extract_dir("videofix", "/system/etc/firmware");
-endif;
 ui_print("Creating Boot Image...");
 set_perm(0, 0, 0777, "/tmp/dd");
 set_perm(0, 0, 0777, "/tmp/abootimg");
