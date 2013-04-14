@@ -45,7 +45,6 @@ PHONE='HTC Rezound'
 
 N_CORES=8
 VERSION=FunkyICS-v3.2.1
-VERSION=Funky-Kernel-
 UPSTREAM=3.0.73
 
 # ----
