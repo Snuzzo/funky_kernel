@@ -8054,7 +8054,7 @@ static void __init vigor_init(void)
 /* 0x40400000~0x42A00000 is 38MB for SF/AUDIO/FB PMEM */
 /* 0x48800000~0x7CC00000 is 836MB for APP */
 /* 0x7CC00000~0x80000000 is 52MB for ADSP PMEM */
-#define SIZE_ADDR1	  0x31000000
+#define SIZE_ADDR1	  0x30800000
 
 static void __init vigor_fixup(struct machine_desc *desc, struct tag *tags,
 				 char **cmdline, struct meminfo *mi)
