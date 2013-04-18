@@ -5,7 +5,14 @@ msg() {
     echo ==== $* ====
     echo
 }
-
+grep 'VERSION = ' "$TOOLS_DIR/Makefile" >>build-config
+grep 'PATCHLEVEL = ' "$TOOLS_DIR/Makefile" >>build-config
+grep 'SUBLEVEL = ' "$TOOLS_DIR/Makefile" >>build-config
+sed -i 's/VERSION = /MAIN=/g' build-config >> build-config
+sed -i 's/PATCHLEVEL = /PATCHLEVEL=/g' build-config >> build-config
+sed -i 's/SUBLEVEL = /SUBLEVEL=/g' build-config >> build-config
+sed -i '/CKMAIN=/ d' build-config
+sed -i '/KERNELMAIN=/ d' build-config
 # -----------------------
 
 . build-config
@@ -15,6 +22,7 @@ MAKE=$TOOLS_DIR/make.sh
 
 # -----------------------
 
+UPSTREAM="$MAIN.$PATCHLEVEL.$SUBLEVEL"
 ZIP=$TARGET_DIR/$VERSION.zip
 SHA1=$TOOLS_DIR/sha1.sh
 FTP=$LOCAL_BUILD_DIR/ftp.sh
@@ -83,8 +91,6 @@ find . -name '*.ko' -exec cp {} $UPDATE_ROOT/system/lib/modules/ \;
 mkdir -p $UPDATE_ROOT/META-INF/com/google/android
 cp $TOOLS_DIR/update-binary $UPDATE_ROOT/META-INF/com/google/android
 
-cp build-config $LOCAL_BUILD_DIR/build-config
-
 $SHA1
 
 SUM=`sha1sum $ZIMAGE | cut --delimiter=' ' -f 1`
@@ -96,6 +102,7 @@ EOF
   sed -e "s|@@SYSTEM_PARTITION@@|$SYSTEM_PARTITION|" \
       -e "s|@@FLASH_BOOT@@|$FLASH_BOOT|" \
       -e "s|@@SUM@@|$SUM|" \
+      -e "s|@@UPSTREAM@@|$UPSTREAM|" \
       < $TOOLS_DIR/updater-script
 ) > $UPDATE_ROOT/META-INF/com/google/android/updater-script
 
@@ -114,7 +121,20 @@ cp $VIDEOFIX/* $UPDATE_ROOT/videofix
     zip -r ../update.zip .
 )
 java -jar $TOOLS_DIR/signapk.jar $CERT $KEY $LOCAL_BUILD_DIR/update.zip $ZIP
-
-$FTP
 make mrproper
+sed -i '/MAIN=/ d' build-config
+sed -i '/PATCHLEVEL=/ d' build-config
+sed -i '/SUBLEVEL=/ d' build-config
+cp build-config $LOCAL_BUILD_DIR/build-config
+$FTP
+echo "Latest version: <font color="#0000FF">$VERSION</font>" >temp
+echo "<a style="'"color: #0ACF66"'" href=http://vp-zp.com$FTPTARGETDIR/$VERSION.zip>Quick-Click Download</a>" >>temp
+git log >> temp
+sed -i -e 's/^/<p>/' temp
+sed -i '/<p>commit/ d' temp
+sed -i '/<p>Author/ d' temp
+sed -i -e 's/Date:/<font color="#CF0A45">Date:/' temp
+perl -ne 'chomp; printf "%s</p></font>\n", $_' < temp > ChangeLog.html
+rm temp
+mv ChangeLog.html $TARGET_DIR/ChangeLog.html
 msg COMPLETE

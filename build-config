@@ -45,7 +45,6 @@ PHONE='HTC Rezound'
 
 N_CORES=8
 VERSION=Funky-Kernel-v3.2.1
-UPSTREAM=3.0.73
 
 # ----
 
@@ -54,5 +53,4 @@ ui_print("Funky Kernel");
 ui_print("for");
 ui_print("$PHONE");
 ui_print("$VERSION");
-ui_print("Linux upstream version:$UPSTREAM");
 EOF`
