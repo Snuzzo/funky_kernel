@@ -117,14 +117,18 @@ sed -i '/MAIN=/ d' build-config
 sed -i '/PATCHLEVEL=/ d' build-config
 sed -i '/SUBLEVEL=/ d' build-config
 cp build-config $LOCAL_BUILD_DIR/build-config
-echo "Latest version: <font color="#0000FF">$VERSION</font>" >temp
-echo "<a style="'"color: #0ACF66"'" href=http://vp-zp.com$FTPTARGETDIR/$VERSION.zip>Quick-Click Download</a>" >>temp
+cat banner >temp2
+echo "<p>Latest version: <font color="#0000FF">$VERSION</p></font>" >>temp2
+echo "<p><a style="'"color: #0ACF66"'" href=http://vp-zp.com/snuzzo$FTPTARGETDIR/$VERSION.zip>Quick-Click Download</a></p>" >>temp2
+cat temp2 > ChangeLog.html
 git log >> temp
 sed -i -e 's/^/<p>/' temp
 sed -i '/<p>commit/ d' temp
 sed -i '/<p>Author/ d' temp
 sed -i -e 's/Date:/<font color="#CF0A45">Date:/' temp
-perl -ne 'chomp; printf "%s</p></font>\n", $_' < temp > ChangeLog.html
+perl -ne 'chomp; printf "%s</p></font>\n", $_' < temp >> ChangeLog.html
+echo "</div></body></html>" >> ChangeLog.html
+rm temp2
 rm temp
 cp ChangeLog.html $TARGET_DIR/ChangeLog.html
 $FTP
