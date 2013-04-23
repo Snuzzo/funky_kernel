@@ -85,6 +85,7 @@ static void set_cpu_work(struct work_struct *work)
 }
 #endif
 
+
 static int msm_cpufreq_target(struct cpufreq_policy *policy,
 				unsigned int target_freq,
 				unsigned int relation)

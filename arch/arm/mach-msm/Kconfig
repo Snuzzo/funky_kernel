@@ -1521,6 +1521,10 @@ config MSM_DALRPC_TEST
 	help
 	  Exercises DAL RPC calls to QDSP6.
 
+config GPU_OVERCLOCK
+	bool "Enable 3D GPU Overclocking option"
+	default n
+
 config MSM_MPDEC
 	bool "Enable kernel based mpdecision"
 	depends on MSM_SMP
@@ -1528,6 +1532,20 @@ config MSM_MPDEC
 	help
 	  This enables kernel based multi core control.
 	  (up/down hotplug based on load)
+
+config CPU_VOLTAGE_TABLE
+  	bool "Enable CPU Voltage Table via sysfs for adjustements"
+  	default n
+
+config CMDLINE_OPTIONS
+	bool "Enable cmdline options command parsing"
+	default n
+	help
+	  This enables the parsing of cmdline options.
+
+config 2DGPU_OVERCLOCK
+	bool "Enable 2D GPU Overclocking option"
+	default n
 
 if CPU_FREQ_MSM
 

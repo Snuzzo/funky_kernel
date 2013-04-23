@@ -111,6 +111,7 @@
 #include <mach/restart.h>
 #include <mach/cable_detect.h>
 #include <mach/panel_id.h>
+#include <linux/msm_tsens.h>
 
 #include "board-vigor.h"
 #include "devices.h"
@@ -344,6 +345,9 @@ int __init vigor_init_panel(struct resource *res, size_t size);
 
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
 int set_two_phase_freq(int cpufreq);
+#ifdef CONFIG_CPU_FREQ_GOV_INTELLIDEMAND
+int id_set_two_phase_freq(int cpufreq);
+#endif
 #endif
 
 #ifdef CONFIG_MMC_MSM_SDC2_SUPPORT
@@ -3116,7 +3120,7 @@ static void __init msm8x60_init_dsps(void)
 /* SMI PMEM Region, as the video core will use offset address */
 /* from the Firmware base */
 #define KERNEL_SMI_BASE			 (MSM_SMI_BASE)
-#define KERNEL_SMI_SIZE			 0x400000
+#define KERNEL_SMI_SIZE			 0x1000000
 
 /* User space SMI PMEM Region for video core*/
 /* used for encoder, decoder input & output buffers  */
@@ -3939,9 +3943,11 @@ static struct platform_device *early_devices[] __initdata = {
 	&msm_device_dmov_adm1,
 };
 
-static struct platform_device msm_tsens_device = {
-	.name   = "tsens-tm",
-	.id = -1,
+static struct tsens_platform_data pyr_tsens_pdata = {
+                .tsens_factor 			= 1000,
+                .hw_type                = MSM_8660,
+                .tsens_num_sensor       = 1,
+                .slope                  = 702,
 };
 
 #if defined(CONFIG_GPIO_SX150X) || defined(CONFIG_GPIO_SX150X_MODULE)
@@ -7540,6 +7546,7 @@ static struct platform_device *vigor_devices[] __initdata = {
 
 #if defined(CONFIG_USB_GADGET_MSM_72K) || defined(CONFIG_USB_EHCI_HCD)
 	&msm_device_otg,
+	&msm_device_hsusb_host,
 #endif
 #ifdef CONFIG_BATTERY_MSM
 	&msm_batt_device,
@@ -7616,7 +7623,6 @@ static struct platform_device *vigor_devices[] __initdata = {
 	&msm_device_rng,
 #endif
 
-	&msm_tsens_device,
 	&msm_rpm_device,
 
 #ifdef CONFIG_BATTERY_MSM8X60
@@ -7817,6 +7823,8 @@ static void __init msm8x60_init(struct msm_board_data *board_data)
 	struct kobject *properties_kobj;
 	struct regulator *margin_power;
 
+	msm_tsens_early_init(&pyr_tsens_pdata);
+
 	/*
 	 * Initialize RPM first as other drivers and devices may need
 	 * it for their initialization.
@@ -7899,6 +7907,9 @@ static void __init msm8x60_init(struct msm_board_data *board_data)
 
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
 	set_two_phase_freq(1134000);
+#ifdef CONFIG_CPU_FREQ_GOV_INTELLIDEMAND
+	id_set_two_phase_freq(1134000);
+#endif
 #endif
 
 	msm8x60_init_tlmm();
@@ -8043,6 +8054,7 @@ static void __init vigor_init(void)
 /* 0x40400000~0x42A00000 is 38MB for SF/AUDIO/FB PMEM */
 /* 0x48800000~0x7CC00000 is 836MB for APP */
 /* 0x7CC00000~0x80000000 is 52MB for ADSP PMEM */
+
 #define SIZE_ADDR1	  0x30400000
 
 static void __init vigor_fixup(struct machine_desc *desc, struct tag *tags,

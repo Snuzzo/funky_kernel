@@ -179,7 +179,7 @@ void deactivate_locked_super(struct super_block *s)
 {
 	struct file_system_type *fs = s->s_type;
 	if (atomic_dec_and_test(&s->s_active)) {
-		cleancache_flush_fs(s);
+		cleancache_invalidate_fs(s);
 		fs->kill_sb(s);
 		/*
 		 * We need to call rcu_barrier so all the delayed rcu free
@@ -1009,6 +1009,8 @@ int freeze_super(struct super_block *sb)
 			printk(KERN_ERR
 				"VFS:Filesystem freeze failed\n");
 			sb->s_frozen = SB_UNFROZEN;
+			smp_wmb();
+			wake_up(&sb->s_wait_unfrozen);
 			deactivate_locked_super(sb);
 			return ret;
 		}
