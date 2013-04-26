@@ -5,9 +5,9 @@ msg() {
     echo ==== $* ====
     echo
 }
-grep 'VERSION = ' "$TOOLS_DIR/Makefile" >>build-config
-grep 'PATCHLEVEL = ' "$TOOLS_DIR/Makefile" >>build-config
-grep 'SUBLEVEL = ' "$TOOLS_DIR/Makefile" >>build-config
+grep 'VERSION = ' "Makefile" >>build-config
+grep 'PATCHLEVEL = ' "Makefile" >>build-config
+grep 'SUBLEVEL = ' "Makefile" >>build-config
 sed -i 's/VERSION = /MAIN=/g' build-config >> build-config
 sed -i 's/PATCHLEVEL = /PATCHLEVEL=/g' build-config >> build-config
 sed -i 's/SUBLEVEL = /SUBLEVEL=/g' build-config >> build-config
