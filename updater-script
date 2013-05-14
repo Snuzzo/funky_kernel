@@ -19,22 +19,35 @@ package_extract_dir("videofix", "/system/etc/firmware");
 package_extract_dir("global", "/system/lib");
 endif;
 if
+file_getprop("/system/build.prop","ro.aa.taskid")==311390
+then
+ui_print("@		Flashing Sense 3.6 Global kernel");
+package_extract_dir("videofix", "/system/etc/firmware");
+package_extract_dir("global", "/system/lib");
+endif;
+if
 file_getprop("/system/build.prop","ro.aa.taskid")==263510
 then
 ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
 package_extract_dir("videofix", "/system/etc/firmware");
+package_extract_dir("uifix", "/system/etc/init.d");
+set_perm(0, 0, 0777, "/system/etc/init.d/99zkillfix");
 endif;
 if
 file_getprop("/system/build.prop","ro.aa.taskid")==290923
 then
 ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
 package_extract_dir("videofix", "/system/etc/firmware");
+package_extract_dir("uifix", "/system/etc/init.d");
+set_perm(0, 0, 0777, "/system/etc/init.d/99zkillfix");
 endif;
 if
 file_getprop("/system/build.prop","ro.aa.taskid")==249167
 then
 ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
 package_extract_dir("videofix", "/system/etc/firmware");
+package_extract_dir("uifix", "/system/etc/init.d");
+set_perm(0, 0, 0777, "/system/etc/init.d/99zkillfix");
 endif;
 ui_print("Creating Boot Image...");
 set_perm(0, 0, 0777, "/tmp/dd");
