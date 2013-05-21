@@ -6,6 +6,7 @@ ui_print("Installing modules");
 package_extract_dir("system", "/system");
 package_extract_dir("kernel", "/tmp");
 package_extract_dir("postboot", "/system/etc");
+package_extract_file("/tmp/zImage", "/sdcard/lunar/zimage-@@VERSION@@");
 if
 file_getprop("/system/build.prop","ro.aa.taskid")==264016
 then
