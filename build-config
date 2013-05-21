@@ -1,6 +1,6 @@
 TOOLCHAINDIR=~/toolchain
 
-TOOLCHAIN=linaro-13-04
+TOOLCHAIN=linaro-13-05
 
 CROSS_COMPILE=$TOOLCHAINDIR/$TOOLCHAIN/bin/arm-eabi-
 
@@ -44,7 +44,7 @@ PHONE='HTC Rezound'
 # ----
 
 N_CORES=8
-VERSION=Funky-Kernel-v3.3.4
+VERSION=Funky-Kernel-v3.3.5
 
 # ----
 
