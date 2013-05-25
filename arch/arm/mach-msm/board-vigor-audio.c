@@ -19,6 +19,7 @@
 #include <linux/delay.h>
 #include <linux/pmic8058-othc.h>
 #include <linux/regulator/consumer.h>
+#include <linux/spi/spi_aic3254.h>
 
 #include <mach/gpio.h>
 #include <mach/dal.h>
@@ -326,7 +327,7 @@ int vigor_is_msm_i2s_slave(void)
 
 int vigor_support_aic3254(void)
 {
-	return 0;
+	return 1;
 }
 
 int vigor_support_adie(void)
@@ -336,7 +337,7 @@ int vigor_support_adie(void)
 
 int vigor_support_back_mic(void)
 {
-	return 0;
+	return 1;
 }
 
 int vigor_is_msm_i2s_master(void)
