@@ -2,6 +2,7 @@
  * Gadget Driver for Android
  *
  * Copyright (C) 2008 Google, Inc.
+ * Copyright (c) 2011-2012, Code Aurora Forum. All rights reserved.
  * Author: Mike Lockwood <lockwood@android.com>
  *
  * This software is licensed under the terms of the GNU General Public
@@ -878,14 +879,28 @@ static int mass_storage_function_init(struct android_usb_function *f,
 	struct mass_storage_function_config *config;
 	struct fsg_common *common;
 	int err;
+	struct android_dev *dev = _android_dev;
+	int i;
 
 	config = kzalloc(sizeof(struct mass_storage_function_config),
 								GFP_KERNEL);
 	if (!config)
 		return -ENOMEM;
 
-	config->fsg.nluns = 1;
-	config->fsg.luns[0].removable = 1;
+	if (dev->pdata->nluns) {
+		config->fsg.nluns = dev->pdata->nluns;
+		if (config->fsg.nluns > FSG_MAX_LUNS)
+			config->fsg.nluns = FSG_MAX_LUNS;
+		for (i = 0; i < config->fsg.nluns; i++) {
+			config->fsg.luns[i].cdrom = 0;
+			config->fsg.luns[i].removable = 1;
+			config->fsg.luns[i].ro = 0;
+		}
+	} else {
+		/* default value */
+		config->fsg.nluns = 1;
+		config->fsg.luns[0].removable = 1;
+	}
 
 	common = fsg_common_init(NULL, cdev, &config->fsg);
 	if (IS_ERR(common)) {
@@ -893,13 +908,15 @@ static int mass_storage_function_init(struct android_usb_function *f,
 		return PTR_ERR(common);
 	}
 
-	err = sysfs_create_link(&f->dev->kobj,
-				&common->luns[0].dev.kobj,
-				"lun");
-	if (err) {
-		fsg_common_release(&common->ref);
-		kfree(config);
-		return err;
+	for (i = 0; i < config->fsg.nluns; i++) {
+		err = sysfs_create_link(&f->dev->kobj,
+					&common->luns[i].dev.kobj,
+					common->luns[i].dev.kobj.name);
+		if (err) {
+			fsg_common_release(&common->ref);
+			kfree(config);
+			return err;
+		}
 	}
 
 	config->common = common;
@@ -1323,6 +1340,10 @@ static struct device_attribute *android_usb_attributes[] = {
 	NULL
 };
 
+#ifdef CONFIG_USB_HTC_SWITCH_STUB
+#include "htc_attr.c"
+#endif
+
 /*-------------------------------------------------------------------------*/
 /* Composite driver */
 
@@ -1518,6 +1539,14 @@ static int __devinit android_probe(struct platform_device *pdev)
 {
 	struct android_usb_platform_data *pdata = pdev->dev.platform_data;
 	struct android_dev *dev = _android_dev;
+
+#ifdef CONFIG_USB_HTC_SWITCH_STUB
+	int err;
+	err = sysfs_create_group(&pdev->dev.kobj, &htc_attr_group);
+	if (err) {
+		pr_err("%s: failed to create HTC USB devices\n", __func__);
+	}
+#endif
 
 	dev->pdata = pdata;
 
