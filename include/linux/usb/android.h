@@ -19,6 +19,7 @@
 
 struct android_usb_platform_data {
 	int (*update_pid_and_serial_num)(uint32_t, const char *);
+	int nluns;
 };
 
 #endif	/* __LINUX_USB_ANDROID_H */

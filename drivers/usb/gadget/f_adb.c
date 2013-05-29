@@ -446,6 +446,8 @@ static struct miscdevice adb_device = {
 };
 
 
+
+
 static int
 adb_function_bind(struct usb_configuration *c, struct usb_function *f)
 {

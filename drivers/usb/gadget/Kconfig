@@ -1089,6 +1089,12 @@ config USB_CSW_HACK
 	 This csw hack feature is for increasing the performance of the mass
 	 storage
 
+config USB_MSC_PROFILING
+	bool "USB MSC performance profiling"
+	help
+	  If you say Y here, support will be added for collecting
+	  Mass-storage performance numbers at the VFS level.
+
 config MODEM_SUPPORT
 	boolean "modem support in generic serial function driver"
 	depends on USB_G_ANDROID
@@ -1163,3 +1169,10 @@ config USB_ANDROID_RMNET_CTRL_SMD
 	 Data interface used is BAM.
 
 endif # USB_GADGET
+
+config USB_HTC_SWITCH_STUB
+	depends on USB_G_ANDROID
+	bool "USB HTC function switch stub"
+	default n
+	help
+	  Provide dummy HTC USB function switch sysfs device for libhtc_ril.
