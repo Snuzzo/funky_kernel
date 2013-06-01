@@ -6,7 +6,7 @@ CROSS_COMPILE=$TOOLCHAINDIR/$TOOLCHAIN/bin/arm-eabi-
 
 LOCAL_BUILD_DIR=~/rez
 
-TARGET_DIR=~/rez/updates
+TARGET_DIR=~/rez/updates/jb
 
 FTPTARGETDIR="/kernels/rezound/jb"
 
