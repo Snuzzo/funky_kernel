@@ -84,7 +84,6 @@
 #include <mach/htc_bdaddress.h>
 #include <mach/htc_sleep_clk.h>
 #endif
-#include <mach/htc_usb.h>
 #include <mach/gpiomux.h>
 #ifdef CONFIG_MSM_DSPS
 #include <mach/msm_dsps.h>
@@ -100,7 +99,7 @@
 #include <linux/i2c/isl9519.h>
 #include <mach/tpa2051d3.h>
 #ifdef CONFIG_USB_G_ANDROID
-#include <linux/usb/android_composite.h>
+#include <linux/usb/android.h>
 #include <mach/usbdiag.h>
 #endif
 #include <linux/regulator/consumer.h>
@@ -1654,19 +1653,7 @@ static int vigor_usb_product_id_match(int product_id, int intrsharing)
 #endif
 
 static struct android_usb_platform_data android_usb_pdata = {
-	.vendor_id	= 0x0BB4,
-	.product_id	= 0x0ccd,
-	.version	= 0x0100,
-	.product_name		= "Android Phone",
-	.manufacturer_name	= "HTC",
-	.num_products = ARRAY_SIZE(usb_products),
-	.products = usb_products,
-	.num_functions = ARRAY_SIZE(usb_functions_all),
-	.functions = usb_functions_all,
-	.enable_fast_charge = NULL,
 	.update_pid_and_serial_num = usb_diag_update_pid_and_serial_num,
-	.usb_id_pin_gpio = VIGOR_GPIO_USB_ID,
-	.fserial_init_string = "smd:modem,sdio:modem_mdm,tty,tty,tty:serial",
 #ifdef CONFIG_USB_GADGET_VERIZON_PRODUCT_ID
 	.match = vigor_usb_product_id_match,
 #endif
@@ -1683,7 +1670,6 @@ static struct platform_device android_usb_device = {
 
 static int __init board_serialno_setup(char *serialno)
 {
-	android_usb_pdata.serial_number = serialno;
 	return 1;
 }
 __setup("androidboot.serialno=", board_serialno_setup);
@@ -1691,23 +1677,8 @@ __setup("androidboot.serialno=", board_serialno_setup);
 static void vigor_add_usb_devices(void)
 {
 	printk(KERN_INFO "%s rev: %d\n", __func__, system_rev);
-	android_usb_pdata.products[0].product_id =
-		android_usb_pdata.product_id;
 
 	config_vigor_mhl_gpios();
-
-	/* diag bit set */
-	if (get_radio_flag() & 0x20000) {
-		android_usb_pdata.diag_init = 1;
-		android_usb_pdata.modem_init = 1;
-		android_usb_pdata.rmnet_init = 1;
-	}
-
-   /* add cdrom support in normal mode */
-   if (board_mfg_mode() == 0) {
-		android_usb_pdata.nluns = 3;
-		android_usb_pdata.cdrom_lun = 0x4;
-   }
 
 	msm_device_gadget_peripheral.dev.parent = &msm_device_otg.dev;
 	platform_device_register(&msm_device_gadget_peripheral);
