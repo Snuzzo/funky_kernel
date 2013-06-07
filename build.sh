@@ -13,6 +13,7 @@ sed -i 's/PATCHLEVEL = /PATCHLEVEL=/g' build-config >> build-config
 sed -i 's/SUBLEVEL = /SUBLEVEL=/g' build-config >> build-config
 sed -i '/CKMAIN=/ d' build-config
 sed -i '/KERNELMAIN=/ d' build-config
+export TARGET_GCC=4.8
 # -----------------------
 
 . build-config
