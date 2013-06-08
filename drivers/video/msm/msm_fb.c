@@ -1454,6 +1454,7 @@ static int msm_fb_register(struct msm_fb_data_type *mfd)
 
 	mfd->var_xres = panel_info->xres;
 	mfd->var_yres = panel_info->yres;
+	mfd->var_frame_rate = panel_info->frame_rate;
 
 	var->pixclock = mfd->panel_info.clk_rate;
 	mfd->var_pixclock = var->pixclock;
@@ -2034,6 +2035,27 @@ static int msm_fb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 	return 0;
 }
 
+int msm_fb_check_frame_rate(struct msm_fb_data_type *mfd
+						, struct fb_info *info)
+{
+	int panel_height, panel_width, var_frame_rate, fps_mod;
+	struct fb_var_screeninfo *var = &info->var;
+	fps_mod = 0;
+	if ((mfd->panel_info.type == DTV_PANEL) ||
+		(mfd->panel_info.type == HDMI_PANEL)) {
+		panel_height = var->yres + var->upper_margin +
+			var->vsync_len + var->lower_margin;
+		panel_width = var->xres + var->right_margin +
+			var->hsync_len + var->left_margin;
+		var_frame_rate = ((var->pixclock)/(panel_height * panel_width));
+		if (mfd->var_frame_rate != var_frame_rate) {
+			fps_mod = 1;
+			mfd->var_frame_rate = var_frame_rate;
+		}
+	}
+	return fps_mod;
+}
+
 static int msm_fb_set_par(struct fb_info *info)
 {
 	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)info->par;
@@ -2075,7 +2097,8 @@ static int msm_fb_set_par(struct fb_info *info)
 		(mfd->hw_refresh && ((mfd->fb_imgType != old_imgType) ||
 				(mfd->var_pixclock != var->pixclock) ||
 				(mfd->var_xres != var->xres) ||
-				(mfd->var_yres != var->yres)))) {
+				(mfd->var_yres != var->yres) ||
+				(msm_fb_check_frame_rate(mfd, info))))) {
 		mfd->var_xres = var->xres;
 		mfd->var_yres = var->yres;
 		mfd->var_pixclock = var->pixclock;
@@ -3019,7 +3042,6 @@ static int msmfb_overlay_play(struct fb_info *info, unsigned long *argp)
 	int	ret;
 	struct msmfb_overlay_data req;
 	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)info->par;
-	struct file *p_src_file = 0;
 	struct msm_fb_panel_data *pdata;
 	static uint64_t ovp_dt;
 	static int64_t ovp_count;
@@ -3075,7 +3097,7 @@ static int msmfb_overlay_play(struct fb_info *info, unsigned long *argp)
 		}
 	}
 
-	ret = mdp4_overlay_play(info, &req, &p_src_file);
+	ret = mdp4_overlay_play(info, &req);
 
 #if defined (CONFIG_FB_MSM_MDP_ABL)
 
@@ -3097,13 +3119,9 @@ static int msmfb_overlay_play(struct fb_info *info, unsigned long *argp)
                jiffies + ((1000 * HZ) / 1000);
        add_timer(&mfd->msmfb_no_update_notify_timer);
        mutex_unlock(&msm_fb_notify_update_sem);
-#endif
 
 #endif
 
-#ifdef CONFIG_ANDROID_PMEM
-	if (p_src_file)
-		put_pmem_file(p_src_file);
 #endif
 
 	return ret;
@@ -3637,7 +3655,9 @@ struct platform_device *msm_fb_add_device(struct platform_device *pdev)
 	mfd->fb_page = fb_num;
 	mfd->index = fbi_list_index;
 	mfd->mdp_fb_page_protection = MDP_FB_PAGE_PROTECTION_WRITECOMBINE;
-
+#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
+	mfd->client = msm_ion_client_create(-1, pdev->name);
+#endif
 	/* link to the latest pdev */
 	mfd->pdev = this_dev;
 
