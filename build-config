@@ -6,11 +6,7 @@ CROSS_COMPILE=$TOOLCHAINDIR/$TOOLCHAIN/bin/arm-eabi-
 
 LOCAL_BUILD_DIR=~/rez
 
-<<<<<<< HEAD
 TARGET_DIR=~/rez/updates/jb/ion
-=======
-TARGET_DIR=~/rez/updates/jb
->>>>>>> aosp-jb
 
 FTPTARGETDIR="/kernels/rezound/jb/ion"
 
@@ -48,13 +44,8 @@ PHONE='HTC Rezound'
 # ----
 
 N_CORES=8
-<<<<<<< HEAD
 NAME=FunkyNeon-AOSP
-VERNUMR=-v3.4
-=======
-NAME=FunkyBean
 VERNUMR=-v3.5
->>>>>>> aosp-jb
 VERSION=$NAME$VERNUMR
 
 # ----

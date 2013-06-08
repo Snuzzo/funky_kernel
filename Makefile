@@ -371,35 +371,7 @@ endif
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-<<<<<<< HEAD
 
-#CFLAGS_KERNEL	= -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -marm -march=armv7-a -mfpu=neon -ftree-vectorize -funroll-loops
-
-CFLAGS_KERNEL	= -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -marm -march=armv7-a -mfpu=neon -ftree-vectorize -mvectorize-with-neon-double
-
-ifeq ($(TARGET_GCC),4.8)
-MODFLAGS	+=	-fno-aggressive-loop-optimizations \
-			-Wno-sizeof-pointer-memaccess
-endif
-CFLAGS_MODULE   = $(MODFLAGS)
-AFLAGS_MODULE   = $(MODFLAGS)
-LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL	= -march=armv7-a \
-		  -mfpu=neon \
-		  -mtune=cortex-a9 \
-		  -fgcse-after-reload \
-		  -fipa-cp-clone \
-		  -fpredictive-commoning \
-		  -fsched-spec-load \
-		  -funswitch-loops \
-		  -fvect-cost-model \
-		  -O2
-ifeq ($(TARGET_GCC),4.8)
-CFLAGS_KERNEL	+=	-fno-aggressive-loop-optimizations \
-			-Wno-sizeof-pointer-memaccess
-endif
-AFLAGS_KERNEL	=
-=======
 ifdef CONFIG_CC_OPTIMIZE_ALOT
 CFLAGS_KERNEL	= -O3 -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -fsingle-precision-constant -mtune=cortex-a8 -marm -march=armv7-a -mfpu=neon -ftree-vectorize -mvectorize-with-neon-double
 AFLAGS_KERNEL	= -O3 -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -fsingle-precision-constant -mtune=cortex-a8 -marm -march=armv7-a -mfpu=neon -ftree-vectorize -mvectorize-with-neon-double
@@ -407,7 +379,6 @@ else
 CFLAGS_KERNEL	= -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -marm -march=armv7-a -mfpu=neon -ftree-vectorize -mvectorize-with-neon-quad
 AFLAGS_KERNEL 	= -fgcse -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize
 endif
->>>>>>> aosp-jb
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -433,20 +404,11 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-<<<<<<< HEAD
-		   -fno-delete-null-pointer-checks
-
-ifeq ($(TARGET_GCC),4.8)
-KBUILD_CFLAGS	+=	-fno-aggressive-loop-optimizations \
-			-Wno-sizeof-pointer-memaccess
-endif
-=======
 		   -fno-delete-null-pointer-checks -Wno-unused-variable -Wno-sizeof-pointer-memaccess
 ifdef CONFIG_CC_OPTIMIZE_ALOT
 KBUILD_AFLAGS_KERNEL := -O3 -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -fsingle-precision-constant -mtune=cortex-a8 -marm -march=armv7-a -mfpu=neon -ftree-vectorize -mvectorize-with-neon-double
 KBUILD_CFLAGS_KERNEL := -O3 -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -fsingle-precision-constant -mtune=cortex-a8 -marm -march=armv7-a -mfpu=neon -ftree-vectorize -mvectorize-with-neon-double
 else
->>>>>>> aosp-jb
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL := -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
 endif
