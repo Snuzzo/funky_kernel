@@ -3091,7 +3091,8 @@ static void __init msm8x60_init_dsps(void)
 /* SMI PMEM Region, as the video core will use offset address */
 /* from the Firmware base */
 #define KERNEL_SMI_BASE			 (MSM_SMI_BASE)
-#define KERNEL_SMI_SIZE			 0x1000000
+
+#define KERNEL_SMI_SIZE			 0x600000
 
 /* User space SMI PMEM Region for video core*/
 /* used for encoder, decoder input & output buffers  */
