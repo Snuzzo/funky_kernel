@@ -5,7 +5,6 @@ run_program("/sbin/mount", "@@SYSTEM_PARTITION@@", "/system");
 ui_print("Installing modules");
 package_extract_dir("system", "/system");
 package_extract_dir("kernel", "/tmp");
-package_extract_file("lunarmenu/zimage@@VERSION@@", "/tmp/zImage");
 ui_print("Creating Boot Image...");
 set_perm(0, 0, 0777, "/tmp/dd");
 set_perm(0, 0, 0777, "/tmp/abootimg");
