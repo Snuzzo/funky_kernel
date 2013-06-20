@@ -1,0 +1,12 @@
+git checkout exp
+sleep 2
+. build.sh
+git checkout aosp-jb
+sleep 2
+. build.sh
+git checkout aosp-ics
+sleep 2
+. build.sh
+git checkout aosp-jb-ion
+sleep 2
+. build.sh
