@@ -40,14 +40,14 @@
 #define COMPLEX_SLEW		7
 
 /* PLL calibration limits.
- * The PLL hardware is capable of 192MHz to 1512MHz. The L_VALs
+ * The PLL hardware is capable of 192MHz to 1728MHz. The L_VALs
  * used for calibration should respect these limits. */
 #define L_VAL_SCPLL_CAL_MIN	0x08 /* =  432 MHz with 27MHz source */
-#define L_VAL_SCPLL_CAL_MAX	0x20 /* = 1728 MHz with 27MHz source */
+#define L_VAL_SCPLL_CAL_MAX	0x20 /* =  1728 MHz with 27MHz source */
 
-#define MAX_VDD_SC		1300000 /* uV */
-#define MIN_VDD_SC		 600000 /* uV */
-#define MAX_VDD_MEM		1250000 /* uV */
+#define MAX_VDD_SC		1400000 /* uV */
+#define MIN_VDD_SC		 700000 /* uV */
+#define MAX_VDD_MEM		1400000 /* uV */
 #define MAX_VDD_DIG		1200000 /* uV */
 #define MAX_AXI			 310500 /* KHz */
 #define SCPLL_LOW_VDD_FMAX	 594000 /* KHz */
@@ -594,16 +594,7 @@ out:
 		mutex_unlock(&drv_state.lock);
 	return rc;
 }
-#ifdef CONFIG_PERFLOCK
-unsigned int get_max_cpu_freq(void)
-{
-	struct clkctl_acpu_speed *f;
-	for (f = acpu_freq_tbl; f->acpuclk_khz != 0; f++)
-		;
-	f--;
-	return f->acpuclk_khz;;
-}
-#endif
+
 #ifdef CONFIG_CPU_VOLTAGE_TABLE
 
 ssize_t acpuclk_get_vdd_levels_str(char *buf) {
@@ -839,16 +830,17 @@ static struct notifier_block __cpuinitdata acpuclock_cpu_notifier = {
 	.notifier_call = acpuclock_cpu_callback,
 };
 
-#ifdef CONFIG_MSM_MPDEC
+#ifdef CONFIG_CMDLINE_OPTIONS
+/* start cmdline_khz */
 uint32_t acpu_check_khz_value(unsigned long khz)
 {
-	struct clkctl_acpu_speed *f;
+        struct clkctl_acpu_speed *f;
 
-	if (khz > 1728000)
-		return CONFIG_MSM_CPU_FREQ_MAX;
+        if (khz > 1728000)
+                return CONFIG_MSM_CPU_FREQ_MAX;
 
-	if (khz < 192000)
-		return CONFIG_MSM_CPU_FREQ_MIN;
+        if (khz < 192000)
+                return CONFIG_MSM_CPU_FREQ_MIN;
 
         for (f = acpu_freq_tbl_oc; f->acpuclk_khz != 0; f++) {
                 if (khz == f->acpuclk_khz)
@@ -863,6 +855,7 @@ uint32_t acpu_check_khz_value(unsigned long khz)
         return -1;
 }
 EXPORT_SYMBOL(acpu_check_khz_value);
+/* end cmdline_khz */
 #endif
 
 static __init struct clkctl_acpu_speed *select_freq_plan(void)
@@ -917,9 +910,13 @@ static int __init acpuclk_8x60_init(struct acpuclk_soc_data *soc_data)
 	regulator_init();
 	bus_init();
 
-	/* Improve boot time by ramping up CPUs immediately. */
-		for_each_online_cpu(cpu)
-			acpuclk_8x60_set_rate(cpu, 1512000, SETRATE_INIT);
+#ifdef CONFIG_MSM_CPU_FREQ_SET_MIN_MAX
+    for_each_online_cpu(cpu)
+      acpuclk_8x60_set_rate(cpu, CONFIG_MSM_CPU_FREQ_MAX, SETRATE_INIT);
+#else
+     for_each_online_cpu(cpu)
+       acpuclk_8x60_set_rate(cpu, 1512000, SETRATE_INIT);
+#endif
 	acpuclk_register(&acpuclk_8x60_data);
 	cpufreq_table_init();
 	register_hotcpu_notifier(&acpuclock_cpu_notifier);
