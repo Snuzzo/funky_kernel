@@ -1,6 +1,6 @@
 TOOLCHAINDIR=~/toolchain
 
-TOOLCHAIN=sabermod-4.8
+TOOLCHAIN=cfX-4.8
 
 CROSS_COMPILE=$TOOLCHAINDIR/$TOOLCHAIN/bin/arm-eabi-
 
@@ -45,7 +45,7 @@ PHONE='HTC Rezound'
 
 N_CORES=8
 NAME=Funky-Kernel
-VERNUMR=-v3.5.1
+VERNUMR=-v3.6
 VERSION=$NAME$VERNUMR
 
 # ----
