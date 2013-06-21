@@ -123,7 +123,7 @@ cat banner >temp2
 echo "<p>Latest version: <font color="#0000FF">$VERSION</p></font>" >>temp2
 echo "<p><a style="'"color: #0ACF66"'" href=http://vp-zp.com/snuzzo$FTPTARGETDIR/$VERSION.zip>Quick-Click Download</a></p>" >>temp2
 cat temp2 > ChangeLog.html
-git log --since=2.week.ago >> temp
+git log --since=3.weeks.ago >> temp
 sed -i -e 's/^/<p>/' temp
 sed -i '/<p>commit/ d' temp
 sed -i '/<p>Author/ d' temp
