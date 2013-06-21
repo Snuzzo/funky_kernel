@@ -5,7 +5,6 @@ run_program("/sbin/mount", "@@SYSTEM_PARTITION@@", "/system");
 ui_print("Installing modules");
 package_extract_dir("system", "/system");
 package_extract_dir("kernel", "/tmp");
-package_extract_file("lunarmenu/zimage@@VERSION@@", "/tmp/zImage");
 package_extract_dir("postboot", "/system/etc");
 if
 file_getprop("/system/build.prop","ro.aa.taskid")==264016

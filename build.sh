@@ -104,7 +104,6 @@ EOF
   sed -e "s|@@SYSTEM_PARTITION@@|$SYSTEM_PARTITION|" \
       -e "s|@@FLASH_BOOT@@|$FLASH_BOOT|" \
       -e "s|@@SUM@@|$SUM|" \
-      -e "s|@@VERSION@@|$VERSION|" \
       -e "s|@@UPSTREAM@@|$UPSTREAM|" \
       < $TOOLS_DIR/updater-script
 ) > $UPDATE_ROOT/META-INF/com/google/android/updater-script
@@ -114,8 +113,7 @@ mkdir -p $UPDATE_ROOT/global
 mkdir -p $UPDATE_ROOT/postboot
 mkdir -p $UPDATE_ROOT/videofix
 mkdir -p $UPDATE_ROOT/uifix
-mkdir -p $UPDATE_ROOT/lunarmenu
-cp $ZIMAGE $UPDATE_ROOT/lunarmenu/zimage$VERSION
+cp $ZIMAGE $ANYKERNEL
 cp $ANYKERNEL/* $UPDATE_ROOT/kernel
 cp $GLOBAL/* $UPDATE_ROOT/global
 cp $POSTBOOT/* $UPDATE_ROOT/postboot
