@@ -43,10 +43,9 @@
  * The PLL hardware is capable of 192MHz to 1512MHz. The L_VALs
  * used for calibration should respect these limits. */
 #define L_VAL_SCPLL_CAL_MIN	0x08 /* =  432 MHz with 27MHz source */
-#define L_VAL_SCPLL_CAL_MAX	0x20 /* = 1728 MHz with 27MHz source */
 
 #define MAX_VDD_SC		1600000 /* uV */
-#define MIN_VDD_SC		 800000 /* uV */
+#define MIN_VDD_SC		 700000 /* uV */
 #define MAX_VDD_MEM		1250000 /* uV */
 #define MAX_VDD_DIG		1200000 /* uV */
 #define MAX_AXI			 310500 /* KHz */
@@ -73,7 +72,7 @@
 #define SCPLL_STATUS_OFFSET		0x10
 #define SCPLL_CFG_OFFSET		0x1C
 #define SCPLL_FSM_CTL_EXT_OFFSET	0x24
-#define SCPLL_LUT_A_HW_MAX		(0x38 + ((L_VAL_SCPLL_CAL_MAX / 4) * 4))
+#define SCPLL_LUT_OFFSET(l_val)		(0x38 + (((l_val) / 4) * 4))
 
 /* Clock registers. */
 #define SPSS0_CLK_CTL_ADDR		(MSM_ACC0_BASE + 0x04)
@@ -159,8 +158,8 @@ static struct msm_bus_paths bw_level_tbl[] = {
 	[0] =  BW_MBPS(824), /* At least 103 MHz on bus. */
 	[1] = BW_MBPS(1336), /* At least 167 MHz on bus. */
 	[2] = BW_MBPS(2008), /* At least 251 MHz on bus. */
-	[3] = BW_MBPS(2480), /* At least 310 MHz on bus. */
-	[4] = BW_MBPS(3200), /* At least 360 MHz on bus. */
+	[3] = BW_MBPS(2720), /* At least 340 MHz on bus. */
+	[4] = BW_MBPS(3600), /* At least 450 MHz on bus. */
 };
 
 static struct msm_bus_scale_pdata bus_client_pdata = {
@@ -201,7 +200,7 @@ static struct clkctl_l2_speed l2_freq_tbl_v2[] = {
 
 #define L2(x) (&l2_freq_tbl_v2[(x)])
 
-static struct clkctl_acpu_speed acpu_freq_tbl_oc[] = {
+static struct clkctl_acpu_speed acpu_freq_tbl_fast[] = {
   { {1, 1},  192000,  ACPU_PLL_8, 3, 1, 0, 0,    L2(1),   800000, 0x03006000},
   /* MAX_AXI row is used to source CPU cores and L2 from the AFAB clock. */
   { {0, 0},  MAX_AXI, ACPU_AFAB,  1, 0, 0, 0,    L2(0),   825000, 0x03006000},
@@ -649,34 +648,28 @@ void acpuclk_set_vdd(unsigned int khz, int vdd_uv) {
 }
 #endif  /* CONFIG_CPU_VOTALGE_TABLE */
 
-static void __init scpll_init(int sc_pll)
+static void __init scpll_init(int pll, unsigned int max_l_val)
 {
 	uint32_t regval;
 
-	pr_debug("Initializing SCPLL%d\n", sc_pll);
+	pr_debug("Initializing SCPLL%d\n", pll);
 
 	/* Clear calibration LUT registers containing max frequency entry.
 	 * LUT registers are only writeable in debug mode. */
-	writel_relaxed(SCPLL_DEBUG_FULL,
-		       sc_pll_base[sc_pll] + SCPLL_DEBUG_OFFSET);
-	writel_relaxed(0x0, sc_pll_base[sc_pll] + SCPLL_LUT_A_HW_MAX);
-	writel_relaxed(SCPLL_DEBUG_NONE,
-		       sc_pll_base[sc_pll] + SCPLL_DEBUG_OFFSET);
+	writel_relaxed(SCPLL_DEBUG_FULL, sc_pll_base[pll] + SCPLL_DEBUG_OFFSET);
+	writel_relaxed(0x0, sc_pll_base[pll] + SCPLL_LUT_OFFSET(max_l_val));
+	writel_relaxed(SCPLL_DEBUG_NONE, sc_pll_base[pll] + SCPLL_DEBUG_OFFSET);
 
 	/* Power-up SCPLL into standby mode. */
-	writel_relaxed(SCPLL_STANDBY, sc_pll_base[sc_pll] + SCPLL_CTL_OFFSET);
+	writel_relaxed(SCPLL_STANDBY, sc_pll_base[pll] + SCPLL_CTL_OFFSET);
 	mb();
 	udelay(10);
 
-	/* Calibrate the SCPLL to the maximum range supported by the h/w. We
-	 * might not use the full range of calibrated frequencies, but this
-	 * simplifies changes required for future increases in max CPU freq.
-	 */
-	regval = (L_VAL_SCPLL_CAL_MAX << 24) | (L_VAL_SCPLL_CAL_MIN << 16);
-	writel_relaxed(regval, sc_pll_base[sc_pll] + SCPLL_CAL_OFFSET);
-
+	/* Calibrate the SCPLL for the frequency range needed. */
+	regval = (max_l_val << 24) | (L_VAL_SCPLL_CAL_MIN << 16);
+	writel_relaxed(regval, sc_pll_base[pll] + SCPLL_CAL_OFFSET);
 	/* Start calibration */
-	writel_relaxed(SCPLL_FULL_CAL, sc_pll_base[sc_pll] + SCPLL_CTL_OFFSET);
+	writel_relaxed(SCPLL_FULL_CAL, sc_pll_base[pll] + SCPLL_CTL_OFFSET);
 
 	/* Wait for proof that calibration has started before checking the
 	 * 'calibration done' bit in the status register. Waiting for the
@@ -684,15 +677,15 @@ static void __init scpll_init(int sc_pll)
 	 * This is required since the 'calibration done' bit takes time to
 	 * transition from 'done' to 'not done' when starting a calibration.
 	 */
-	while (readl_relaxed(sc_pll_base[sc_pll] + SCPLL_LUT_A_HW_MAX) == 0)
+	while (!readl_relaxed(sc_pll_base[pll] + SCPLL_LUT_OFFSET(max_l_val)))
 		cpu_relax();
 
 	/* Wait for calibration to complete. */
-	while (readl_relaxed(sc_pll_base[sc_pll] + SCPLL_STATUS_OFFSET) & 0x2)
+	while (readl_relaxed(sc_pll_base[pll] + SCPLL_STATUS_OFFSET) & 0x2)
 		cpu_relax();
 
 	/* Power-down SCPLL. */
-	scpll_disable(sc_pll);
+	scpll_disable(pll);
 }
 
 /* Force ACPU core and L2 cache clocks to rates that don't require SCPLLs. */
@@ -839,39 +832,35 @@ static struct notifier_block __cpuinitdata acpuclock_cpu_notifier = {
 	.notifier_call = acpuclock_cpu_callback,
 };
 
-#ifdef CONFIG_MSM_MPDEC
-uint32_t acpu_check_khz_value(unsigned long khz)
-{
-	struct clkctl_acpu_speed *f;
-
-	if (khz > 1728000)
-		return CONFIG_MSM_CPU_FREQ_MAX;
-
-	if (khz < 192000)
-		return CONFIG_MSM_CPU_FREQ_MIN;
-
-        for (f = acpu_freq_tbl_oc; f->acpuclk_khz != 0; f++) {
-                if (khz == f->acpuclk_khz)
-                        return f->acpuclk_khz;
-                else if (khz < f->acpuclk_khz) {
-                        f--;
-                        if (f->acpuclk_khz == MAX_AXI)
-                                f--;
-                        return f->acpuclk_khz;
-                }
-        }
-        return -1;
-}
-EXPORT_SYMBOL(acpu_check_khz_value);
-#endif
-
 static __init struct clkctl_acpu_speed *select_freq_plan(void)
 {
-	uint32_t max_khz;
+	uint32_t pte_efuse, speed_bin, pvs, max_khz;
 	struct clkctl_acpu_speed *f;
 
-		max_khz = 1728000;
-		acpu_freq_tbl = acpu_freq_tbl_oc;
+	pte_efuse = readl_relaxed(QFPROM_PTE_EFUSE_ADDR);
+
+	speed_bin = pte_efuse & 0xF;
+	if (speed_bin == 0xF)
+		speed_bin = (pte_efuse >> 4) & 0xF;
+
+	pvs = (pte_efuse >> 10) & 0x7;
+	if (pvs == 0x7)
+		pvs = (pte_efuse >> 13) & 0x7;
+
+	/* match max OC allowable */
+	max_khz = 1728000;
+	/* set everything to default to freq fast table regardless of efuse reading */
+	switch (pvs) {
+		case 0x0:
+		case 0x7:
+		case 0x1:
+		case 0x3:
+		default:
+			acpu_freq_tbl = acpu_freq_tbl_fast;
+			pr_info("ACPU PVS: Fast\n");
+			break;
+	}
+
 	/* Truncate the table based to max_khz. */
 	for (f = acpu_freq_tbl; f->acpuclk_khz != 0; f++) {
 		if (f->acpuclk_khz > max_khz) {
@@ -896,30 +885,46 @@ int processor_name_read_proc(char *page, char **start, off_t off,
 			   int count, int *eof, void *data)
 {
 	char *p = page;
-	p += sprintf(p, "Funkdified Dual Core");
+	uint32_t pte_efuse, speed_bin;
+
+	pte_efuse = readl_relaxed(QFPROM_PTE_EFUSE_ADDR);
+
+	speed_bin = pte_efuse & 0xF;
+	if (speed_bin == 0xF)
+		speed_bin = (pte_efuse >> 4) & 0xF;
+
+	if (speed_bin == 0x2)
+		p += sprintf(p, "1.7 GHz dual core");
+	else if (speed_bin == 0x1)
+		p += sprintf(p, "1.5 GHz dual core");
+	else
+		p += sprintf(p, "1.2 GHz dual core");
+
 	return p - page;
 }
 
 static int __init acpuclk_8x60_init(struct acpuclk_soc_data *soc_data)
 {
+	struct clkctl_acpu_speed *max_freq;
 	int cpu;
 
 	mutex_init(&drv_state.lock);
 	spin_lock_init(&drv_state.l2_lock);
 
 	/* Configure hardware. */
-	select_freq_plan();
+	max_freq = select_freq_plan();
 	unselect_scplls();
 	scpll_set_refs();
 	for_each_possible_cpu(cpu)
-		scpll_init(cpu);
-	scpll_init(L2);
+		scpll_init(cpu, max_freq->l_val);
+	scpll_init(L2, max_freq->l2_level->l_val);
 	regulator_init();
 	bus_init();
 
 	/* Improve boot time by ramping up CPUs immediately. */
-		for_each_online_cpu(cpu)
-			acpuclk_8x60_set_rate(cpu, CONFIG_MSM_CPU_FREQ_MAX, SETRATE_INIT);
+	for_each_online_cpu(cpu)
+		acpuclk_8x60_set_rate(cpu, max_freq->acpuclk_khz, SETRATE_INIT);
+
 	acpuclk_register(&acpuclk_8x60_data);
 	cpufreq_table_init();
 	register_hotcpu_notifier(&acpuclock_cpu_notifier);
