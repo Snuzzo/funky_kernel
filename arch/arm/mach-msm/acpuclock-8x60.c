@@ -201,8 +201,9 @@ static struct clkctl_l2_speed l2_freq_tbl_v2[] = {
 
 #define L2(x) (&l2_freq_tbl_v2[(x)])
 
+/* SCPLL frequencies = 2 * 27 MHz * L_VAL */
 static struct clkctl_acpu_speed acpu_freq_tbl_fast[] = {
-  { {1, 1},  192000,  ACPU_PLL_8, 3, 1, 0, 0,    L2(1),   800000, 0x03006000},
+  { {1, 1},  96000,  ACPU_PLL_8, 3, 1, 0, 0,    L2(1),   725000, 0x03006000},
   /* MAX_AXI row is used to source CPU cores and L2 from the AFAB clock. */
   { {0, 0},  MAX_AXI, ACPU_AFAB,  1, 0, 0, 0,    L2(0),   825000, 0x03006000},
   { {1, 1},  384000,  ACPU_PLL_8, 3, 0, 0, 0,    L2(1),   825000, 0x03006000},
@@ -583,7 +584,8 @@ static int acpuclk_8x60_set_rate(int cpu, unsigned long rate,
 	if (tgt_s->acpuclk_khz < strt_s->acpuclk_khz)
 		decrease_vdd(cpu, tgt_s->vdd_sc, vdd_mem, vdd_dig, reason);
 
-	pr_debug("ACPU%d speed change complete\n", cpu);
+	/* CPU rate change frequently, not proper to be printed by default */
+	/* pr_debug("ACPU%d speed change complete\n", cpu); */
 
 	/* Re-enable AVS */
 	if (reason == SETRATE_CPUFREQ)
@@ -833,6 +835,32 @@ static struct notifier_block __cpuinitdata acpuclock_cpu_notifier = {
 	.notifier_call = acpuclock_cpu_callback,
 };
 
+#ifdef CONFIG_MSM_MPDEC
+uint32_t acpu_check_khz_value(unsigned long khz)
+{
+	struct clkctl_acpu_speed *f;
+
+        if (khz > 1728000)
+                return CONFIG_MSM_CPU_FREQ_MAX;
+
+        if (khz < 96000)
+                return CONFIG_MSM_CPU_FREQ_MIN;
+
+        for (f = acpu_freq_tbl_fast; f->acpuclk_khz != 0; f++) {
+                if (khz == f->acpuclk_khz)
+                        return f->acpuclk_khz;
+                else if (khz < f->acpuclk_khz) {
+                        f--;
+                        if (f->acpuclk_khz == MAX_AXI)
+                                f--;
+                        return f->acpuclk_khz;
+                }
+        }
+        return -1;
+}
+EXPORT_SYMBOL(acpu_check_khz_value);
+#endif
+
 static __init struct clkctl_acpu_speed *select_freq_plan(void)
 {
 	uint32_t pte_efuse, speed_bin, pvs, max_khz;
@@ -849,7 +877,7 @@ static __init struct clkctl_acpu_speed *select_freq_plan(void)
 		pvs = (pte_efuse >> 13) & 0x7;
 
 	/* match max OC allowable */
-	max_khz = 1728000;
+	max_khz = 1728000; //1512000;
 	/* set everything to default to freq fast table regardless of efuse reading */
 	switch (pvs) {
 		case 0x0:
