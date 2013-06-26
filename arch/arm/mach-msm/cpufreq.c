@@ -58,9 +58,9 @@ static int override_cpu;
  */
 
 /* to be safe, fill vars with defaults */
-uint32_t cmdline_maxkhz = 1674000, cmdline_minkhz = 192000;
+uint32_t cmdline_maxkhz = 1674000, cmdline_minkhz = 96000;
 char cmdline_gov[16] = "intellidemand";
-uint32_t cmdline_maxscroff = 432000;
+uint32_t cmdline_maxscroff = 702000;
 bool cmdline_scroff = false;
 
 /* only override the governor 2 times, when
