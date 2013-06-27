@@ -27,7 +27,7 @@ DEFCONFIG=vigor_auto_defconfig
 # SCARY
 # LULZACTIVE
 
-DEFAULT_GOVERNOR=INTELLIDEMAND
+DEFAULT_GOVERNOR=LULZACTIVE
 
 #...And the following schedulers
 # SIO
@@ -45,7 +45,7 @@ PHONE='HTC Rezound'
 
 N_CORES=8
 NAME=FunkyBean
-VERNUMR=-v3.6
+VERNUMR=-v3.7
 VERSION=$NAME$VERNUMR
 
 # ----
