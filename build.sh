@@ -18,7 +18,7 @@ export TARGET_GCC=4.8
 
 . build-config
 
-TOOLS_DIR=`dirname "$0"`
+TOOLS_DIR=~/funky_kernel
 MAKE=$TOOLS_DIR/make.sh
 
 # -----------------------
