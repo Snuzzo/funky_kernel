@@ -1,6 +1,6 @@
 TOOLCHAINDIR=~/toolchain
 
-TOOLCHAIN=cfX-4.8
+TOOLCHAIN=sabermod-4.8
 
 CROSS_COMPILE=$TOOLCHAINDIR/$TOOLCHAIN/bin/arm-eabi-
 
