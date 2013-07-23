@@ -198,8 +198,8 @@ SUBARCH := arm
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 SUBARCH := arm
 export KBUILD_BUILDHOST := $(SUBARCH)
-ARCH		?= $(SUBARCH)
-CROSS_COMPILE	?= arm-eabi-
+ARCH		:= arm
+CROSS_COMPILE	?= /home/snuzzo/toolchain/sabermod-4.8/bin/arm-eabi-
 CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 
 # Architecture as present in compile.h
