@@ -6,9 +6,9 @@ CROSS_COMPILE=$TOOLCHAINDIR/$TOOLCHAIN/bin/arm-eabi-
 
 LOCAL_BUILD_DIR=~/rez
 
-TARGET_DIR=~/rez/updates/jb
+TARGET_DIR=~/rez/updates/jb/ion
 
-FTPTARGETDIR="/kernels/rezound/jb"
+FTPTARGETDIR="/kernels/rezound/jb/ion"
 
 SYSTEM_PARTITION="/dev/block/mmcblk0p29"
 
@@ -44,7 +44,7 @@ PHONE='HTC Rezound'
 # ----
 
 N_CORES=8
-NAME=FunkyBean
+NAME=FunkyNeon
 VERNUMR=-v3.8
 VERSION=$NAME$VERNUMR
 
