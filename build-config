@@ -45,7 +45,7 @@ PHONE='HTC Rezound'
 
 N_CORES=8
 NAME=FunkyBean
-VERNUMR=-v3.8.2
+VERNUMR=-v3.8.3
 VERSION=$NAME$VERNUMR
 
 # ----
