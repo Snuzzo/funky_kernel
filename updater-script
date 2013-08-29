@@ -7,6 +7,13 @@ package_extract_dir("system", "/system");
 package_extract_dir("kernel", "/tmp");
 package_extract_dir("postboot", "/system/etc");
 if
+file_getprop("/system/build.prop","ro.sun_dream.version")=="Rezound 2.42.708.3"
+then
+ui_print("@		Flashing Sun_Dream ROM kernel");
+package_extract_dir("videofix", "/system/etc/firmware");
+package_extract_dir("global", "/system/lib");
+endif;
+if
 file_getprop("/system/build.prop","ro.aa.taskid")==264016
 then
 ui_print("@		Flashing Sense 3.6 OTA kernel");
@@ -30,6 +37,7 @@ file_getprop("/system/build.prop","ro.aa.taskid")==263510
 then
 ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
 package_extract_dir("videofix", "/system/etc/firmware");
+package_extract_dir("global", "/system/lib");
 package_extract_dir("uifix", "/system/etc/init.d");
 set_perm(0, 0, 0777, "/system/etc/init.d/99zkillfix");
 endif;
@@ -38,6 +46,7 @@ file_getprop("/system/build.prop","ro.aa.taskid")==290923
 then
 ui_print("@		Flashing Sense 3.6 OTA/4.X kernel");
 package_extract_dir("videofix", "/system/etc/firmware");
+package_extract_dir("global", "/system/lib");
 package_extract_dir("uifix", "/system/etc/init.d");
 set_perm(0, 0, 0777, "/system/etc/init.d/99zkillfix");
 endif;
