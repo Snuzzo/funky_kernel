@@ -1,3 +1,4 @@
+#Added CWM compatibility on 11/9
 TOOLCHAINDIR=~/toolchain
 
 TOOLCHAIN=sabermod-4.8
