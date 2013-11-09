@@ -402,7 +402,7 @@ static struct clk_ops clk_ops_cxo = {
 };
 
 static struct fixed_clk cxo_clk = {
-	.rate = 16800000,
+	.rate = 19200000,
 	.c = {
 		.dbg_name = "cxo_clk",
 		.ops = &clk_ops_cxo,
@@ -411,7 +411,7 @@ static struct fixed_clk cxo_clk = {
 };
 
 static struct pll_vote_clk pll8_clk = {
-	.rate = 276000000,
+	.rate = 384000000,
 	.en_reg = BB_PLL_ENA_SC0_REG,
 	.en_mask = BIT(8),
 	.status_reg = BB_PLL8_STATUS_REG,
