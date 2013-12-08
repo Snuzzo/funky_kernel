@@ -3090,16 +3090,16 @@ static void __init msm8x60_init_dsps(void)
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + 0x313800 + MSM_FB_DSUB_PMEM_ADDER, 4096)
 #endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
 
-#define MSM_PMEM_SF_SIZE         0x1000000 /* 16 Mbytes */
+#define MSM_PMEM_SF_SIZE         0x7DC6C0 /* 8 Mbytes */
 
-#define MSM_PMEM_ADSP_SIZE       0x239C000
+#define MSM_PMEM_ADSP_SIZE       0x1800000
 /* MAX( prim, video)
  * prim = 1280 * 736 * 4 * 2
  * video = 1152 * 1920 * 1.5 * 2
 */
-#define MSM_PMEM_AUDIO_SIZE      0x239000
+#define MSM_PMEM_AUDIO_SIZE      0x133333
 
-#define MSM_PMEM_ADSP_BASE       (0x40400000)
+#define MSM_PMEM_ADSP_BASE       (0x3F864000)
 #define MSM_PMEM_SF_BASE	 (MSM_FB_BASE - MSM_PMEM_SF_SIZE)
 
 #define MSM_PMEM_AUDIO_BASE      (MSM_PMEM_ADSP_BASE + MSM_PMEM_ADSP_SIZE)
@@ -8015,7 +8015,8 @@ static void __init vigor_init(void)
 /* 0x40400000~0x42A00000 is 38MB for SF/AUDIO/FB PMEM */
 /* 0x48800000~0x7CC00000 is 836MB for APP */
 /* 0x7CC00000~0x80000000 is 52MB for ADSP PMEM */
-#define SIZE_ADDR1    0x34400000
+#define SIZE_ADDR1    0x34BDC6C0
+//#define SIZE_ADDR1    0x34400000
 
 static void __init vigor_fixup(struct machine_desc *desc, struct tag *tags,
 				 char **cmdline, struct meminfo *mi)
