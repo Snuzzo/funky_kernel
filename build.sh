@@ -17,7 +17,7 @@ sed -i '/KERNELMAIN=/ d' build-config
 
 . build-config
 
-TOOLS_DIR=~/funky_kernel
+TOOLS_DIR=./
 MAKE=$TOOLS_DIR/make.sh
 
 # -----------------------
